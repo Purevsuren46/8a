@@ -4,6 +4,7 @@ const { protect, authorize } = require("../middleware/protect");
 const {
   getGoods,
   getGood,
+  getUserGoods,
   createGood,
   deleteGood,
   updateGood,
@@ -17,6 +18,10 @@ router
   .route("/")
   .get(getGoods)
   .post(protect, authorize("admin", "operator"), createGood);
+
+router
+  .route("/user")
+  .get(protect, getUserGoods)
 
 router
   .route("/:id")

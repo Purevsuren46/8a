@@ -1,6 +1,7 @@
 const Bill = require("../models/Bill");
+const Good = require("../models/Good");
+const Transaction = require("../models/Transaction");
 const path = require("path");
-const Category = require("../models/Category");
 const MyError = require("../utils/myError");
 const asyncHandler = require("express-async-handler");
 const paginate = require("../utils/paginate");
@@ -19,7 +20,7 @@ exports.getBills = asyncHandler(async (req, res, next) => {
 
   const bills = await Bill.find(req.query, select)
     .populate({
-      path: "category",
+      path: "transaction",
       select: "name averagePrice",
     })
     .sort(sort)
@@ -65,16 +66,31 @@ exports.getBill = asyncHandler(async (req, res, next) => {
 });
 
 exports.createReceipt = asyncHandler(async (req, res, next) => {
-  const category = await Category.findById(req.body.category);
 
-  if (!category) {
-    throw new MyError(req.body.category + " ID-тэй категори байхгүй!", 400);
-  }
 
   req.body.createUser = req.userId;
   req.body.type = "Орлого";
-
   const bill = await Bill.create(req.body);
+
+  for(let i = 0; i < req.body.transactions.length;  i++) {
+    req.body.transactions[i].bill = bill.id
+    req.body.transactions[i].type = bill.type
+    req.body.transactions[i].incomeType = bill.incomeType
+    req.body.transactions[i].createUser = bill.createUser
+    if(req.body.transactions[i].finalPrice == undefined) {
+      req.body.transactions[i].finalPrice = req.body.transactions[i].price * req.body.transactions[i].quantity
+    }
+    if(req.body.transactions[i].price == undefined) {
+      req.body.transactions[i].price = req.body.transactions[i].finalPrice / req.body.transactions[i].quantity
+    }
+    const transaction = await Transaction.create(req.body.transactions[i])
+    bill.transactions[i].transactionId = transaction.id 
+    bill.save()
+    const good = await Good.findById(req.body.transactions[i].good)
+    good.quantity += req.body.transactions[i].quantity
+    good.save()
+  }
+
 
   res.status(200).json({
     success: true,
@@ -83,16 +99,30 @@ exports.createReceipt = asyncHandler(async (req, res, next) => {
 });
 
 exports.createDrain = asyncHandler(async (req, res, next) => {
-    const category = await Category.findById(req.body.category);
-  
-    if (!category) {
-      throw new MyError(req.body.category + " ID-тэй категори байхгүй!", 400);
-    }
-  
+
     req.body.createUser = req.userId;
     req.body.type = "Зарлага";
   
     const bill = await Bill.create(req.body);
+
+    for(let i = 0; i < req.body.transactions.length;  i++) {
+      req.body.transactions[i].bill = bill.id
+      req.body.transactions[i].type = bill.type
+      req.body.transactions[i].incomeType = bill.incomeType
+      req.body.transactions[i].createUser = bill.createUser
+      if(req.body.transactions[i].finalPrice == undefined) {
+        req.body.transactions[i].finalPrice = req.body.transactions[i].price * req.body.transactions[i].quantity
+      }
+      if(req.body.transactions[i].price == undefined) {
+        req.body.transactions[i].price = req.body.transactions[i].finalPrice / req.body.transactions[i].quantity
+      }
+      const transaction = await Transaction.create(req.body.transactions[i])
+      bill.transactions[i].transactionId = transaction.id 
+      bill.save()
+      const good = await Good.findById(req.body.transactions[i].good)
+      good.quantity -= req.body.transactions[i].quantity
+      good.save()
+    }
   
     res.status(200).json({
       success: true,

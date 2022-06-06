@@ -4,6 +4,8 @@ const { protect, authorize } = require("../middleware/protect");
 const {
   getBills,
   getBill,
+  getUserReceipts,
+  getUserDrains,
   createReceipt,
   createDrain,
   deleteBill,
@@ -14,18 +16,22 @@ const router = express.Router();
 
 //"/api/v1/bills"
 router
+  .route("/")
+  .get(protect, getBills)
+
+router
   .route("/receipt")
-  .get(getBills)
+  .get(protect, getUserReceipts)
   .post(protect, authorize("admin", "operator"), createReceipt);
 
-  router
+router
   .route("/drain")
-  .get(getBills)
+  .get(protect, getUserDrains)
   .post(protect, authorize("admin", "operator"), createDrain);
 
 router
   .route("/:id")
-  .get(getBill)
+  
   .delete(protect, authorize("admin"), deleteBill)
   .put(protect, authorize("admin"), updateBill);
 

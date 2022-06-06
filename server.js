@@ -13,6 +13,7 @@ const categoriesRoutes = require("./routes/categories");
 const goodsRoutes = require("./routes/goods");
 const usersRoutes = require("./routes/users");
 const billsRoutes = require("./routes/bills");
+const transactionsRoutes = require("./routes/transactions");
 const cors = require("cors");
 var cookieParser = require("cookie-parser");
 
@@ -66,6 +67,7 @@ app.use("/api/v1/categories", categoriesRoutes);
 app.use("/api/v1/goods", goodsRoutes);
 app.use("/api/v1/users", usersRoutes);
 app.use("/api/v1/bills", billsRoutes);
+app.use("/api/v1/transactions", transactionsRoutes);
 app.use(errorHandler);
 
 
