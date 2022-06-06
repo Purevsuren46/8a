@@ -13,13 +13,13 @@ const GoodSchema = new mongoose.Schema(
     },
     barCode: {
       type: String,
-      default: "no-photo.jpg",
     },
     price: {
       type: Number
     },
     quantity: {
-      type: Number
+      type: Number,
+      default: 0
     },
     finalPrice: {
       type: Number

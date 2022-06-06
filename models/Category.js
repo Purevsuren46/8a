@@ -5,7 +5,6 @@ const CategorySchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      trim: true,
       maxlength: [
         50,
         "Категорийн нэрний урт дээд тал нь 50 тэмдэгт байх ёстой.",
@@ -14,10 +13,6 @@ const CategorySchema = new mongoose.Schema(
     slug: String,
     description: {
       type: String,
-      maxlength: [
-        500,
-        "Категорийн тайлбарын урт дээд тал нь 500 тэмдэгт байх ёстой.",
-      ],
     },
     photo: {
       type: String,
@@ -38,18 +33,8 @@ CategorySchema.virtual("books", {
   justOne: false,
 });
 
-CategorySchema.pre("remove", async function (next) {
-  console.log("removing ....");
-  await this.model("Book").deleteMany({ category: this._id });
-  next();
-});
 
-CategorySchema.pre("save", function (next) {
-  // name хөрвүүлэх
-  this.slug = slugify(this.name);
-  this.averageRating = Math.floor(Math.random() * 10) + 1;
-  // this.averagePrice = Math.floor(Math.random() * 100000) + 3000;
-  next();
-});
+
+
 
 module.exports = mongoose.model("Category", CategorySchema);

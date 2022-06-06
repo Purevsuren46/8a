@@ -1,13 +1,20 @@
 const mongoose = require("mongoose");
 
-const BillSchema = new mongoose.Schema(
+const TransactionSchema = new mongoose.Schema(
   {
-    transactions: [{
-        transactionId: {
-            type: mongoose.Schema.ObjectId,
-            ref: "Transaction",
-        },
-    }],
+    good: {
+        type: mongoose.Schema.ObjectId,
+        ref: "Good",
+    },
+    price: {
+      type: Number
+    },
+    quantity: {
+      type: Number
+    },
+    finalPrice: {
+      type: Number
+    },
     incomeType: {
       type: String,
       enum: ["Бэлэн", "Зээл"]
@@ -15,6 +22,10 @@ const BillSchema = new mongoose.Schema(
     type: {
         type: String,
         enum: ["Орлого", "Зарлага"]
+    },
+    bill: {
+        type: mongoose.Schema.ObjectId,
+        ref: "Bill",
     },
     createUser: {
       type: mongoose.Schema.ObjectId,
@@ -30,4 +41,4 @@ const BillSchema = new mongoose.Schema(
 
 
 
-module.exports = mongoose.model("Bill", BillSchema);
+module.exports = mongoose.model("Transaction", TransactionSchema);
