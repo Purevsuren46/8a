@@ -12,6 +12,15 @@ const BillSchema = new mongoose.Schema(
       type: String,
       enum: ["Бэлэн", "Зээл"]
     },
+    loanName: {
+      type: String,
+    },
+    loanPhone: {
+      type: Number,
+    },
+    loanDate: {
+      type: Date,
+    },
     type: {
         type: String,
         enum: ["Орлого", "Зарлага"]

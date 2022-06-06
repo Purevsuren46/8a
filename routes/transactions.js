@@ -23,7 +23,7 @@ router
 
 router
   .route("/:id")
-  
+  .get(protect, getTransaction)
   .delete(protect, authorize("admin"), deleteTransaction)
   .put(protect, authorize("admin"), updateTransaction);
 
