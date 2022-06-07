@@ -20,6 +20,8 @@ var cookieParser = require("cookie-parser");
 const mongoSanitize = require("express-mongo-sanitize");
 const helmet = require("helmet");
 var xss = require("xss-clean");
+const rateLimit = require("express-rate-limit");
+const hpp = require("hpp");
 // Аппын тохиргоог process.env рүү ачаалах
 dotenv.config({ path: "./config/config.env" });
 
@@ -51,7 +53,15 @@ var corsOptions = {
   methods: "GET, POST, PUT, DELETE",
   credentials: true,
 };
-
+app.use(express.static(path.join(__dirname, "public")));
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 500, // limit each IP to 100 requests per windowMs
+  message: "15 минутанд 3 удаа л хандаж болно! ",
+});
+app.use(limiter);
+// http parameter pollution халдлагын эсрэг books?name=aaa&name=bbb  ---> name="bbb"
+app.use(hpp());
 // Body parser
 app.use(cookieParser());
 app.use(logger);

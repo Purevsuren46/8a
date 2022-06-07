@@ -169,6 +169,7 @@ exports.uploadGoodPhoto = asyncHandler(async (req, res, next) => {
   if (!file.mimetype.startsWith("image")) {
     throw new MyError("Та зураг upload хийнэ үү.", 400);
   }
+  console.log(file)
 
 
   file.name = `photo_${req.params.id}${path.parse(file.name).ext}`;
