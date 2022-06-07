@@ -1,5 +1,6 @@
 const Good = require("../models/Good");
 const path = require("path");
+const sharp = require("sharp");
 const Category = require("../models/Category");
 const MyError = require("../utils/myError");
 const asyncHandler = require("express-async-handler");
@@ -169,26 +170,16 @@ exports.uploadGoodPhoto = asyncHandler(async (req, res, next) => {
     throw new MyError("Та зураг upload хийнэ үү.", 400);
   }
 
-  if (file.size > process.env.MAX_UPLOAD_FILE_SIZE) {
-    throw new MyError("Таны зурагны хэмжээ хэтэрсэн байна.", 400);
-  }
 
   file.name = `photo_${req.params.id}${path.parse(file.name).ext}`;
 
-  file.mv(`${process.env.FILE_UPLOAD_PATH}/${file.name}`, (err) => {
-    if (err) {
-      throw new MyError(
-        "Файлыг хуулах явцад алдаа гарлаа. Алдаа : " + err.message,
-        400
-      );
-    }
+  const picture = await sharp(file.data).resize({width: parseInt(process.env.FILE_SIZE)}).toFile(`${process.env.FILE_UPLOAD_PATH}/${file.name}`);
 
-    good.photo = file.name;
-    good.save();
+  good.photo = file.name;
+  good.save();
 
-    res.status(200).json({
-      success: true,
-      data: file.name,
-    });
+  res.status(200).json({
+    success: true,
+    data: file.name,
   });
 });
