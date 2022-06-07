@@ -17,7 +17,7 @@ const router = express.Router();
 router
   .route("/")
   .get(getGoods)
-  .post(protect, authorize("admin", "operator"), createGood);
+  .post(protect, createGood);
 
 router
   .route("/user")
@@ -26,12 +26,12 @@ router
 router
   .route("/:id")
   .get(getGood)
-  .delete(protect, authorize("admin"), deleteGood)
-  .put(protect, authorize("admin"), updateGood);
+  .delete(protect, deleteGood)
+  .put(protect, updateGood);
 
 router
   .route("/:id/upload-photo")
-  .put(protect, authorize("admin"), uploadGoodPhoto);
+  .put(protect, uploadGoodPhoto);
 
 
 module.exports = router;

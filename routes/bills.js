@@ -22,16 +22,15 @@ router
 router
   .route("/receipt")
   .get(protect, getUserReceipts)
-  .post(protect, authorize("admin", "operator"), createReceipt);
+  .post(protect, createReceipt);
 
 router
   .route("/drain")
   .get(protect, getUserDrains)
-  .post(protect, authorize("admin", "operator"), createDrain);
+  .post(protect, createDrain);
 
 router
   .route("/:id")
-  
   .delete(protect, authorize("admin"), deleteBill)
   .put(protect, authorize("admin"), updateBill);
 

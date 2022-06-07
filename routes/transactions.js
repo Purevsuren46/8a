@@ -30,8 +30,7 @@ router
 router
   .route("/:id/bill")
   .get(protect, getBillTransactions)
-  .delete(protect, authorize("admin"), deleteTransaction)
-  .put(protect, authorize("admin"), updateTransaction);
+
 
 
 
