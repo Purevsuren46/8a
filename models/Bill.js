@@ -18,6 +18,9 @@ const BillSchema = new mongoose.Schema(
     loanPhone: {
       type: Number,
     },
+    loanSize: {
+      type: Number,
+    },
     loanDate: {
       type: Date,
     },

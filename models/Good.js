@@ -17,6 +17,9 @@ const GoodSchema = new mongoose.Schema(
     price: {
       type: Number
     },
+    sellPrice: {
+      type: Number
+    },
     quantity: {
       type: Number,
       default: 0
