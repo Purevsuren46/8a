@@ -15,6 +15,10 @@ const TransactionSchema = new mongoose.Schema(
     finalPrice: {
       type: Number
     },
+    isBasket: {
+      type: Boolean,
+      default: false
+    },
     incomeType: {
       type: String,
       enum: ["Бэлэн", "Зээл"]

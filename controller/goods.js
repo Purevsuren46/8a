@@ -19,10 +19,6 @@ exports.getGoods = asyncHandler(async (req, res, next) => {
   const pagination = await paginate(page, limit, Good);
 
   const goods = await Good.find(req.query, select)
-    .populate({
-      path: "category",
-      select: "name averagePrice",
-    })
     .sort(sort)
     .skip(pagination.start - 1)
     .limit(limit);
@@ -169,7 +165,6 @@ exports.uploadGoodPhoto = asyncHandler(async (req, res, next) => {
   if (!file.mimetype.startsWith("image")) {
     throw new MyError("Та зураг upload хийнэ үү.", 400);
   }
-  console.log(file)
 
 
   file.name = `photo_${req.params.id}${path.parse(file.name).ext}`;

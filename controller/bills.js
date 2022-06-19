@@ -67,27 +67,27 @@ exports.getBill = asyncHandler(async (req, res, next) => {
 
 exports.createReceipt = asyncHandler(async (req, res, next) => {
 
-
   req.body.createUser = req.userId;
   req.body.type = "Орлого";
   const bill = await Bill.create(req.body);
+  const transactions = await Transaction.find({createUser: req.userId, isBasket: false});
 
-  for(let i = 0; i < req.body.transactions.length;  i++) {
-    req.body.transactions[i].bill = bill.id
-    req.body.transactions[i].type = bill.type
-    req.body.transactions[i].incomeType = bill.incomeType
-    req.body.transactions[i].createUser = bill.createUser
-    if(req.body.transactions[i].finalPrice == undefined) {
-      req.body.transactions[i].finalPrice = req.body.transactions[i].price * req.body.transactions[i].quantity
+
+  for(let i = 0; i < transactions.length;  i++) {
+    transactions[i].bill = bill.id
+    transactions[i].type = bill.type
+    transactions[i].incomeType = bill.incomeType
+    transactions[i].isBasket = true
+    if(transactions[i].finalPrice == undefined) {
+      transactions[i].finalPrice = transactions[i].price * transactions[i].quantity
     }
-    if(req.body.transactions[i].price == undefined) {
-      req.body.transactions[i].price = req.body.transactions[i].finalPrice / req.body.transactions[i].quantity
+    if(transactions[i].price == undefined) {
+      transactions[i].price = transactions[i].finalPrice / transactions[i].quantity
     }
-    const transaction = await Transaction.create(req.body.transactions[i])
-    bill.transactions[i].transactionId = transaction.id 
-    bill.save()
-    const good = await Good.findById(req.body.transactions[i].good)
-    good.quantity += req.body.transactions[i].quantity
+    transactions[i].save()
+
+    const good = await Good.findById(transactions[i].good)
+    good.quantity += transactions[i].quantity
     good.save()
   }
 

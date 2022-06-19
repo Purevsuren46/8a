@@ -34,8 +34,24 @@ exports.getTransactions = asyncHandler(async (req, res, next) => {
   });
 });
 
+exports.createTransaction = asyncHandler(async (req, res, next) => {
+  req.body.createUser = req.userId
+  const transaction = await Transaction.create(req.body);
+
+  res.status(200).json({
+    success: true,
+    data: transaction,
+  });
+});
+
 exports.getUserTransactions = asyncHandler(async (req, res, next) => {
   req.query.createUser = req.userId;
+  return this.getTransactions(req, res, next);
+});
+
+exports.getUserIsBasketTransactions = asyncHandler(async (req, res, next) => {
+  req.query.createUser = req.userId;
+  req.query.isBasket = false;
   return this.getTransactions(req, res, next);
 });
 

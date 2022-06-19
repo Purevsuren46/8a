@@ -4,7 +4,9 @@ const { protect, authorize } = require("../middleware/protect");
 const {
   getTransactions,
   getTransaction,
+  createTransaction,
   getUserTransactions,
+  getUserIsBasketTransactions,
   getBillTransactions,
   deleteTransaction,
   updateTransaction,
@@ -16,10 +18,15 @@ const router = express.Router();
 router
   .route("/")
   .get(protect, getTransactions)
+  .post(protect, createTransaction)
 
 router
   .route("/user")
   .get(protect, getUserTransactions)
+
+router
+  .route("/basket")
+  .get(protect, getUserIsBasketTransactions)
 
 router
   .route("/:id")
