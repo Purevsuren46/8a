@@ -6,6 +6,7 @@ const MyError = require("../utils/myError");
 const asyncHandler = require("express-async-handler");
 const paginate = require("../utils/paginate");
 const User = require("../models/User");
+const Transaction = require("../models/Transaction");
 
 // api/v1/goods
 exports.getGoods = asyncHandler(async (req, res, next) => {
@@ -111,9 +112,10 @@ exports.deleteGood = asyncHandler(async (req, res, next) => {
     throw new MyError(req.params.id + " ID-тэй ном байхгүй байна.", 404);
   }
 
-  if (good.createUser.toString() !== req.userId && req.userRole !== "admin") {
-    throw new MyError("Та зөвхөн өөрийнхөө номыг л засварлах эрхтэй", 403);
-  }
+  // if (good.createUser.toString() !== req.userId && req.userRole !== "admin") {
+  //   throw new MyError("Та зөвхөн өөрийнхөө номыг л засварлах эрхтэй", 403);
+  // }
+  const transactions = await Transaction.findAndDelete
 
   const user = await User.findById(req.userId);
 

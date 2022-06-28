@@ -57,6 +57,21 @@ const GoodSchema = new mongoose.Schema(
     },
   },
   { toJSON: { virtuals: true }, toObject: { virtuals: true } }
+  
 );
+
+GoodSchema.pre("remove", async function (next) {
+
+  const transaction = await this.model('Transaction').find({good: this._id})
+
+  const trans = []
+  for (let i = 0;  i < transaction.length; i++) {
+    trans.push(transaction[i].bill)
+  }
+  await this.model('Transaction').deleteMany({good: this._id})
+
+  await this.model('Bill').deleteMany({_id: trans})
+  next()
+});
 
 module.exports = mongoose.model("Good", GoodSchema);
