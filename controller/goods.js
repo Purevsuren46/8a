@@ -19,6 +19,7 @@ exports.getGoods = asyncHandler(async (req, res, next) => {
   const pagination = await paginate(page, limit, Good);
 
   const goods = await Good.find(req.query, select)
+    .populate({path: "category", select: "name"})
     .sort(sort)
     .skip(pagination.start - 1)
     .limit(limit);
@@ -65,7 +66,7 @@ exports.getCategoryGoods = asyncHandler(async (req, res, next) => {
 });
 
 exports.getGood = asyncHandler(async (req, res, next) => {
-  const good = await Good.findById(req.params.id);
+  const good = await Good.findById(req.params.id).populate({path: "category", select: "name"});
 
   if (!good) {
     throw new MyError(req.params.id + " ID-тэй ном байхгүй байна.", 404);
