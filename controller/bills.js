@@ -74,8 +74,7 @@ exports.createReceipt = asyncHandler(async (req, res, next) => {
   user.billNumber += 1
   user.save()
   const date = bill.createdAt.toLocaleDateString("en-US").split("/")
-  bill.number = `Z${date[2].substring(2,4)}${date[0].toString().padStart(2, '0')}${user.billNumber.toString().padStart(4, '0')}`
-  bill.save()
+  bill.number = `O${date[2].substring(2,4)}${date[0].toString().padStart(2, '0')}${user.billNumber.toString().padStart(4, '0')}`
   const transactions = await Transaction.find({createUser: req.userId, isBasket: false});
 
 
@@ -96,6 +95,10 @@ exports.createReceipt = asyncHandler(async (req, res, next) => {
     good.quantity += transactions[i].quantity
     good.save()
   }
+  for(let i = 0; i < transactions.length;  i++) {
+    bill.finalPrice += transactions[i].finalPrice
+  }
+  bill.save()
 
 
   res.status(200).json({
@@ -113,10 +116,9 @@ exports.createDrain = asyncHandler(async (req, res, next) => {
   user.billNumber += 1
   user.save()
   const date = bill.createdAt.toLocaleDateString("en-US").split("/")
-  bill.number = `O${date[2].substring(2,4)}${date[0].toString().padStart(2, '0')}${user.billNumber.toString().padStart(4, '0')}`
-  bill.save()
+  bill.number = `Z${date[2].substring(2,4)}${date[0].toString().padStart(2, '0')}${user.billNumber.toString().padStart(4, '0')}`
+  
   const transactions = await Transaction.find({createUser: req.userId, isBasket: false});
-
 
   for(let i = 0; i < transactions.length;  i++) {
     const good = await Good.findById(transactions[i].good)
@@ -142,6 +144,10 @@ exports.createDrain = asyncHandler(async (req, res, next) => {
     good.quantity -= transactions[i].quantity
     good.save()
   }
+  for(let i = 0; i < transactions.length;  i++) {
+    bill.finalPrice += transactions[i].finalPrice
+  }
+  bill.save()
 
 
   res.status(200).json({

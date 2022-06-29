@@ -18,6 +18,10 @@ const BillSchema = new mongoose.Schema(
     number: {
       type: String,
     },
+    finalPrice: {
+      type: Number,
+      default: 0
+    },
     loanPhone: {
       type: Number,
     },
