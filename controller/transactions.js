@@ -20,7 +20,7 @@ exports.getTransactions = asyncHandler(async (req, res, next) => {
   const transactions = await Transaction.find(req.query, select)
     .populate({
       path: "good",
-      select: "name",
+      select: "name photo",
     })
     .sort(sort)
     .skip(pagination.start - 1)
