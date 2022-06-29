@@ -107,6 +107,14 @@ exports.createDrain = asyncHandler(async (req, res, next) => {
 
 
   for(let i = 0; i < transactions.length;  i++) {
+    const good = await Good.findById(transactions[i].good)
+    if(good.quantity < transactions[i].quantity) {
+      throw new MyError("Зарлагын тоо бүтээгдэхүүний тооноос их байна", 400);
+    }
+
+  }
+
+  for(let i = 0; i < transactions.length;  i++) {
     transactions[i].bill = bill.id
     transactions[i].type = bill.type
     transactions[i].incomeType = bill.incomeType
