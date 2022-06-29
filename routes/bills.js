@@ -4,6 +4,7 @@ const { protect, authorize } = require("../middleware/protect");
 const {
   getBills,
   getBill,
+  getUserBills,
   getUserReceipts,
   getUserDrains,
   createReceipt,
@@ -28,6 +29,10 @@ router
   .route("/drain")
   .get(protect, getUserDrains)
   .post(protect, createDrain);
+
+router
+  .route("/user")
+  .get(protect, getUserBills)
 
 router
   .route("/:id")
