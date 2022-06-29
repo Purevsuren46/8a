@@ -70,6 +70,12 @@ exports.createReceipt = asyncHandler(async (req, res, next) => {
   req.body.createUser = req.userId;
   req.body.type = "Орлого";
   const bill = await Bill.create(req.body);
+  const user = await User.findById(req.userId)
+  user.billNumber += 1
+  user.save()
+  const date = bill.createdAt.toLocaleDateString("en-US").split("/")
+  bill.number = `Z${date[2].substring(2,4)}${date[0].toString().padStart(2, '0')}${user.billNumber.toString().padStart(4, '0')}`
+  bill.save()
   const transactions = await Transaction.find({createUser: req.userId, isBasket: false});
 
 
@@ -103,6 +109,12 @@ exports.createDrain = asyncHandler(async (req, res, next) => {
   req.body.createUser = req.userId;
   req.body.type = "Зарлага";
   const bill = await Bill.create(req.body);
+  const user = await User.findById(req.userId)
+  user.billNumber += 1
+  user.save()
+  const date = bill.createdAt.toLocaleDateString("en-US").split("/")
+  bill.number = `O${date[2].substring(2,4)}${date[0].toString().padStart(2, '0')}${user.billNumber.toString().padStart(4, '0')}`
+  bill.save()
   const transactions = await Transaction.find({createUser: req.userId, isBasket: false});
 
 
@@ -111,7 +123,6 @@ exports.createDrain = asyncHandler(async (req, res, next) => {
     if(good.quantity < transactions[i].quantity) {
       throw new MyError("Зарлагын тоо бүтээгдэхүүний тооноос их байна", 400);
     }
-
   }
 
   for(let i = 0; i < transactions.length;  i++) {

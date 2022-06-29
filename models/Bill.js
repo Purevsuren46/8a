@@ -15,6 +15,9 @@ const BillSchema = new mongoose.Schema(
     loanName: {
       type: String,
     },
+    number: {
+      type: String,
+    },
     loanPhone: {
       type: Number,
     },

@@ -17,6 +17,10 @@ const UserSchema = new mongoose.Schema({
   email: {
     type: String,
   },
+  billNumber: {
+    type: Number,
+    default: 0
+  },
   role: {
     type: String,
     enum: ["user", "operator", "admin"],

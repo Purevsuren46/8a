@@ -129,21 +129,19 @@ exports.deleteGood = asyncHandler(async (req, res, next) => {
 });
 
 exports.updateGood = asyncHandler(async (req, res, next) => {
-  const good = await Good.findById(req.params.id);
+  const good = await Good.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+    runValidators: true,
+  });
 
   if (!good) {
     throw new MyError(req.params.id + " ID-тэй ном байхгүйээээ.", 400);
   }
 
-  if (good.createUser.toString() !== req.userId && req.userRole !== "admin") {
-    throw new MyError("Та зөвхөн өөрийнхөө номыг л засварлах эрхтэй", 403);
-  }
 
-  req.body.updateUser = req.userId;
 
-  for (let attr in req.body) {
-    good[attr] = req.body[attr];
-  }
+
+
 
   good.save();
 
