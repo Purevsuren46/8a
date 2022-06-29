@@ -47,6 +47,13 @@ const BillSchema = new mongoose.Schema(
   { toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
 
+BillSchema.pre("remove", async function (next) {
+
+  const transaction = await this.model('Transaction').deleteMany({bill: this._id})
+
+  next()
+});
+
 
 
 module.exports = mongoose.model("Bill", BillSchema);
