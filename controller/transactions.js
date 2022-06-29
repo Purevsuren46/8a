@@ -108,20 +108,16 @@ exports.deleteTransaction = asyncHandler(async (req, res, next) => {
 });
 
 exports.updateTransaction = asyncHandler(async (req, res, next) => {
-  const transaction = await Transaction.findById(req.params.id);
+  const transaction = await Transaction.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+    runValidators: true,
+  });
 
   if (!transaction) {
     throw new MyError(req.params.id + " ID-тэй ном байхгүйээээ.", 400);
   }
 
-  if (transaction.createUser.toString() !== req.userId && req.userRole !== "admin") {
-    throw new MyError("Та зөвхөн өөрийнхөө номыг л засварлах эрхтэй", 403);
-  }
 
-  req.body.updateUser = req.userId;
-
-
-  transaction.save();
 
   res.status(200).json({
     success: true,
