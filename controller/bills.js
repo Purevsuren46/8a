@@ -111,13 +111,7 @@ exports.createDrain = asyncHandler(async (req, res, next) => {
 
   req.body.createUser = req.userId;
   req.body.type = "Зарлага";
-  const bill = await Bill.create(req.body);
-  const user = await User.findById(req.userId)
-  user.billNumber += 1
-  user.save()
-  const date = bill.createdAt.toLocaleDateString("en-US").split("/")
-  bill.number = `Z${date[2].substring(2,4)}${date[0].toString().padStart(2, '0')}${user.billNumber.toString().padStart(4, '0')}`
-  
+
   const transactions = await Transaction.find({createUser: req.userId, isBasket: false});
 
   for(let i = 0; i < transactions.length;  i++) {
@@ -126,7 +120,14 @@ exports.createDrain = asyncHandler(async (req, res, next) => {
       throw new MyError("Зарлагын тоо бүтээгдэхүүний тооноос их байна", 400);
     }
   }
-
+  
+  const bill = await Bill.create(req.body);
+  const user = await User.findById(req.userId)
+  user.billNumber += 1
+  user.save()
+  const date = bill.createdAt.toLocaleDateString("en-US").split("/")
+  bill.number = `Z${date[2].substring(2,4)}${date[0].toString().padStart(2, '0')}${user.billNumber.toString().padStart(4, '0')}`
+  
   for(let i = 0; i < transactions.length;  i++) {
     transactions[i].bill = bill.id
     transactions[i].type = bill.type
