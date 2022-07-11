@@ -49,7 +49,14 @@ exports.getUserTransactions = asyncHandler(async (req, res, next) => {
   return this.getTransactions(req, res, next);
 });
 
+exports.getLoanTransactions = asyncHandler(async (req, res, next) => {
+  req.query.createUser = req.userId;
+  req.query.incomeType = "Зээл";
+  return this.getTransactions(req, res, next);
+});
+
 exports.getGoodTransactions = asyncHandler(async (req, res, next) => {
+  req.query.createUser = req.userId;
   req.query.good = req.params.id;
   return this.getTransactions(req, res, next);
 });

@@ -6,6 +6,7 @@ const {
   getTransaction,
   createTransaction,
   getUserTransactions,
+  getLoanTransactions,
   getGoodTransactions,
   getUserIsBasketTransactions,
   getBillTransactions,
@@ -24,6 +25,10 @@ router
 router
   .route("/user")
   .get(protect, getUserTransactions)
+
+router
+  .route("/loan")
+  .get(protect, getLoanTransactions)
 
 router
   .route("/:id/good")
