@@ -89,11 +89,12 @@ exports.createReceipt = asyncHandler(async (req, res, next) => {
     if(transactions[i].price == undefined) {
       transactions[i].price = transactions[i].finalPrice / transactions[i].quantity
     }
-    transactions[i].save()
 
     const good = await Good.findById(transactions[i].good)
     good.quantity += transactions[i].quantity
+    transaction[i].balanceGoodNumber = good.quantity
     good.save()
+    transactions[i].save()
   }
   for(let i = 0; i < transactions.length;  i++) {
     bill.finalPrice += transactions[i].finalPrice
@@ -139,11 +140,12 @@ exports.createDrain = asyncHandler(async (req, res, next) => {
     if(transactions[i].price == undefined) {
       transactions[i].price = transactions[i].finalPrice / transactions[i].quantity
     }
-    transactions[i].save()
 
     const good = await Good.findById(transactions[i].good)
     good.quantity -= transactions[i].quantity
+    transaction[i].balanceGoodNumber = good.quantity
     good.save()
+    transactions[i].save()
   }
   for(let i = 0; i < transactions.length;  i++) {
     bill.finalPrice += transactions[i].finalPrice

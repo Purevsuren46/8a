@@ -15,6 +15,9 @@ const TransactionSchema = new mongoose.Schema(
     finalPrice: {
       type: Number
     },
+    balanceGoodNumber: {
+      type: Number
+    },
     isBasket: {
       type: Boolean,
       default: false
