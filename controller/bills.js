@@ -176,35 +176,85 @@ exports.createDrain = asyncHandler(async (req, res, next) => {
   user.save()
   const date = bill.createdAt.toLocaleDateString("en-US").split("/")
   bill.number = `Z${date[2].substring(2,4)}${date[0].toString().padStart(2, '0')}${user.billNumber.toString().padStart(4, '0')}`
+
+  if(req.body.template) {
+    const transaction = await Transaction.find({template: req.body.template});
+    if (!transaction) {
+      throw new MyError(req.body.template + " ID-тэй template байхгүй байна.", 404);
+    }
+
+    for(let i = 0; i < transaction.length;  i++) {
+      if(transaction[i].finalPrice == undefined) {
+        transaction[i].finalPrice = transaction[i].price * transaction[i].quantity
+      }
+      if(transaction[i].price == undefined) {
+        transaction[i].price = transaction[i].finalPrice / transaction[i].quantity
+      }
+      req.body.good = transaction[i].good
+      req.body.price = transaction[i].price
+      req.body.quantity = transaction[i].quantity
+      req.body.createUser = transaction[i].createUser
+      req.body.finalPrice = transaction[i].finalPrice
+      delete req.body.template
+      const transactions = await Transaction.create(req.body)
+
+      transactions.bill = bill.id
+      transactions.type = bill.type
+      transactions.incomeType = bill.incomeType
+      transactions.isBasket = true
+
+
   
-  for(let i = 0; i < transactions.length;  i++) {
-    transactions[i].bill = bill.id
-    transactions[i].type = bill.type
-    transactions[i].incomeType = bill.incomeType
-    transactions[i].isBasket = true
-    if(transactions[i].finalPrice == undefined) {
-      transactions[i].finalPrice = transactions[i].price * transactions[i].quantity
+      const good = await Good.findById(transactions.good)
+      good.quantity -= transactions.quantity
+      transactions.balanceGoodNumber = good.quantity
+      good.save()
+      transactions.save()
     }
-    if(transactions[i].price == undefined) {
-      transactions[i].price = transactions[i].finalPrice / transactions[i].quantity
+    for(let i = 0; i < transaction.length;  i++) {
+      bill.finalPrice += transaction[i].finalPrice
     }
+    bill.save()
+  
+  
+    res.status(200).json({
+      success: true,
+      data: bill,
+    });
+  } else {
+    const transactions = await Transaction.find({createUser: req.userId, isBasket: false});
 
-    const good = await Good.findById(transactions[i].good)
-    good.quantity -= transactions[i].quantity
-    transactions[i].balanceGoodNumber = good.quantity
-    good.save()
-    transactions[i].save()
+    for(let i = 0; i < transactions.length;  i++) {
+      transactions[i].bill = bill.id
+      transactions[i].type = bill.type
+      transactions[i].incomeType = bill.incomeType
+      transactions[i].isBasket = true
+      if(transactions[i].finalPrice == undefined) {
+        transactions[i].finalPrice = transactions[i].price * transactions[i].quantity
+      }
+      if(transactions[i].price == undefined) {
+        transactions[i].price = transactions[i].finalPrice / transactions[i].quantity
+      }
+  
+      const good = await Good.findById(transactions[i].good)
+      good.quantity += transactions[i].quantity
+      transactions[i].balanceGoodNumber = good.quantity
+      good.save()
+      transactions[i].save()
+    }
+    for(let i = 0; i < transactions.length;  i++) {
+      bill.finalPrice -= transactions[i].finalPrice
+    }
+    bill.save()
+  
+  
+    res.status(200).json({
+      success: true,
+      data: bill,
+    });
   }
-  for(let i = 0; i < transactions.length;  i++) {
-    bill.finalPrice += transactions[i].finalPrice
-  }
-  bill.save()
 
 
-  res.status(200).json({
-    success: true,
-    data: bill,
-  });
 });
 
 exports.deleteBill = asyncHandler(async (req, res, next) => {
