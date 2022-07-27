@@ -92,7 +92,7 @@ exports.createReceipt = asyncHandler(async (req, res, next) => {
 
     const good = await Good.findById(transactions[i].good)
     good.quantity += transactions[i].quantity
-    transaction[i].balanceGoodNumber = good.quantity
+    transactions[i].balanceGoodNumber = good.quantity
     good.save()
     transactions[i].save()
   }
@@ -143,7 +143,7 @@ exports.createDrain = asyncHandler(async (req, res, next) => {
 
     const good = await Good.findById(transactions[i].good)
     good.quantity -= transactions[i].quantity
-    transaction[i].balanceGoodNumber = good.quantity
+    transactions[i].balanceGoodNumber = good.quantity
     good.save()
     transactions[i].save()
   }
