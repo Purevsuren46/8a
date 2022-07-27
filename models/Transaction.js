@@ -34,6 +34,13 @@ const TransactionSchema = new mongoose.Schema(
         type: mongoose.Schema.ObjectId,
         ref: "Bill",
     },
+    template: {
+      type: mongoose.Schema.ObjectId,
+      ref: "Template",
+  },
+  templateName: {
+    type: String
+},
     createUser: {
       type: mongoose.Schema.ObjectId,
       ref: "User",
