@@ -35,13 +35,13 @@ router.use(protect);
 
 router
   .route("/:id")
-  .get(authorize("admin", "operator"), getUser)
-  .put(authorize("admin"), updateUser)
-  .delete(authorize("admin"), deleteUser);
+  .get(getUser)
+  .put( updateUser)
+  .delete( deleteUser);
 
 router
   .route("/:id/goods")
-  .get(authorize("admin", "operator", "user"), getUserGoods);
+  .get( getUserGoods);
 
 
 module.exports = router;
