@@ -172,7 +172,7 @@ exports.createDrain = asyncHandler(async (req, res, next) => {
   
   const bill = await Bill.create(req.body);
   const user = await User.findById(req.userId)
-  user.billNumber += 1
+  user.billNumber -= 1
   user.save()
   const date = bill.createdAt.toLocaleDateString("en-US").split("/")
   bill.number = `Z${date[2].substring(2,4)}${date[0].toString().padStart(2, '0')}${user.billNumber.toString().padStart(4, '0')}`
@@ -237,7 +237,7 @@ exports.createDrain = asyncHandler(async (req, res, next) => {
       }
   
       const good = await Good.findById(transactions[i].good)
-      good.quantity += transactions[i].quantity
+      good.quantity -= transactions[i].quantity
       transactions[i].balanceGoodNumber = good.quantity
       good.save()
       transactions[i].save()
