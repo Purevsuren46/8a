@@ -106,6 +106,7 @@ exports.createReceipt = asyncHandler(async (req, res, next) => {
   
       const good = await Good.findById(transactions.good)
       good.quantity += transactions.quantity
+      good.receipt += transactions.quantity
       transactions.balanceGoodNumber = good.quantity
       good.save()
       transactions.save()
@@ -137,6 +138,7 @@ exports.createReceipt = asyncHandler(async (req, res, next) => {
   
       const good = await Good.findById(transactions[i].good)
       good.quantity += transactions[i].quantity
+      good.receipt += transactions[i].quantity
       transactions[i].balanceGoodNumber = good.quantity
       good.save()
       transactions[i].save()
@@ -207,6 +209,7 @@ exports.createDrain = asyncHandler(async (req, res, next) => {
   
       const good = await Good.findById(transactions.good)
       good.quantity -= transactions.quantity
+      good.drain += transactions.quantity
       transactions.balanceGoodNumber = good.quantity
       good.save()
       transactions.save()
@@ -238,6 +241,7 @@ exports.createDrain = asyncHandler(async (req, res, next) => {
   
       const good = await Good.findById(transactions[i].good)
       good.quantity -= transactions[i].quantity
+      good.drain += transactions[i].quantity
       transactions[i].balanceGoodNumber = good.quantity
       good.save()
       transactions[i].save()

@@ -24,6 +24,14 @@ const GoodSchema = new mongoose.Schema(
       type: Number,
       default: 0
     },
+    receipt: {
+      type: Number,
+      default: 0
+    },
+    drain: {
+      type: Number,
+      default: 0
+    },
     finalPrice: {
       type: Number
     },
