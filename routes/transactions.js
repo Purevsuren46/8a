@@ -8,6 +8,8 @@ const {
   getUserTransactions,
   getLoanTransactions,
   getGoodTransactions,
+  getAllProfit,
+  getAllGoodProfit,
   getUserIsBasketTransactions,
   getBillTransactions,
   deleteTransaction,
@@ -37,6 +39,14 @@ router
 router
   .route("/basket")
   .get(protect, getUserIsBasketTransactions)
+
+router
+  .route("/profit")
+  .get(protect, getAllProfit)
+
+router
+  .route("/profit/:id")
+  .get(protect, getAllGoodProfit)
 
 router
   .route("/:id")

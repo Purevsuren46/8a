@@ -56,9 +56,147 @@ exports.getLoanTransactions = asyncHandler(async (req, res, next) => {
 });
 
 exports.getGoodTransactions = asyncHandler(async (req, res, next) => {
-  req.query.createUser = req.userId;
+  // req.query.createUser = req.userId;
   req.query.good = req.params.id;
   return this.getTransactions(req, res, next);
+});
+
+exports.getAllProfit = asyncHandler(async (req, res, next) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 5;
+  req.query.sort = "createdAt"
+  const sort = req.query.sort;
+  const select = req.query.select;
+  ["select", "sort", "page", "limit"].forEach((el) => delete req.query[el]);
+  
+
+  const transactions = await Transaction.find({createUser: req.userId, isBasket: true})    
+  .sort(sort)
+  .limit(limit);
+
+  const receipts = await Transaction.find({createUser: req.userId, type: "Орлого", isBasket: true})    
+    .sort(sort)
+    .limit(limit);
+
+  const drains = await Transaction.find({createUser: req.userId, type: "Зарлага", isBasket: true})
+    .sort(sort)
+    .limit(limit);
+    
+  if(transactions.length == 0) {
+    throw new MyError("Бараанд борлуулалтын түүх алга", 404);
+  }
+  let last = 0
+  if(transactions[0].type == "Орлого") {
+    last = transactions[0].balanceGoodNumber - transactions[0].quantity
+  } else {
+    last = transactions[0].balanceGoodNumber + transactions[0].quantity
+  }
+  
+  let receiptFinalPrice = 0
+  let receiptQuantity = 0
+  for (let i = 0; i < receipts.length; i++) {
+    receiptFinalPrice += receipts[i].finalPrice
+    receiptQuantity += receipts[i].quantity
+  }
+  let drainFinalPrice = 0
+  let drainQuantity = 0
+
+  for (let i = 0; i < receipts.length; i++) {
+    drainFinalPrice += drains[i].finalPrice
+    drainQuantity += drains[i].quantity
+  }
+  let receiptAveragePrice = receiptFinalPrice / receiptQuantity
+  let drainAveragePrice = drainFinalPrice / drainQuantity
+  let oneProfit = drainAveragePrice - receiptAveragePrice
+  let allProfit = oneProfit * drainQuantity
+  let lastBalance = transactions[transactions.length - 1].balanceGoodNumber
+
+
+
+
+  res.status(200).json({
+    success: true,
+    firstBalance: last,
+    receiptQuantity: receiptQuantity,
+    receiptAveragePrice: receiptAveragePrice,
+    receiptFinalPrice: receiptFinalPrice,
+    drainQuantity: drainQuantity,
+    drainAveragePrice: drainAveragePrice,
+    drainFinalPrice: drainFinalPrice,
+    oneProfit: oneProfit,
+    allProfit: allProfit,
+    lastBalance: lastBalance,
+  });
+});
+
+exports.getAllGoodProfit = asyncHandler(async (req, res, next) => {
+  const limit = parseInt(req.query.limit) || 5;
+  req.query.sort = "createdAt"
+  const sort = req.query.sort;
+  ["select", "sort", "page", "limit"].forEach((el) => delete req.query[el]);
+
+  if(!req.params.id) {
+    throw new MyError("Бараагаа оруул", 404);
+  }
+  
+
+  const transactions = await Transaction.find({createUser: req.userId, isBasket: true, good: req.params.id})    
+  .sort(sort)
+  .limit(limit);
+
+  const receipts = await Transaction.find({createUser: req.userId, type: "Орлого", isBasket: true, good: req.params.id})    
+    .sort(sort)
+    .limit(limit);
+
+  const drains = await Transaction.find({createUser: req.userId, type: "Зарлага", isBasket: true, good: req.params.id})
+    .sort(sort)
+    .limit(limit);
+
+  if(transactions.length == 0) {
+    throw new MyError("Бараанд борлуулалтын түүх алга", 404);
+  }
+  let last = 0
+  if(transactions[0].type == "Орлого") {
+    last = transactions[0].balanceGoodNumber - transactions[0].quantity
+  } else {
+    last = transactions[0].balanceGoodNumber + transactions[0].quantity
+  }
+  
+  let receiptFinalPrice = 0
+  let receiptQuantity = 0
+  for (let i = 0; i < receipts.length; i++) {
+    receiptFinalPrice += receipts[i].finalPrice
+    receiptQuantity += receipts[i].quantity
+  }
+  let drainFinalPrice = 0
+  let drainQuantity = 0
+
+  for (let i = 0; i < receipts.length; i++) {
+    drainFinalPrice += drains[i].finalPrice
+    drainQuantity += drains[i].quantity
+  }
+  let receiptAveragePrice = receiptFinalPrice / receiptQuantity
+  let drainAveragePrice = drainFinalPrice / drainQuantity
+  let oneProfit = drainAveragePrice - receiptAveragePrice
+  let allProfit = oneProfit * drainQuantity
+  let lastBalance = transactions[transactions.length - 1].balanceGoodNumber
+
+
+
+
+  res.status(200).json({
+    success: true,
+    firstBalance: last,
+    receiptQuantity: receiptQuantity,
+    receiptAveragePrice: receiptAveragePrice,
+    receiptFinalPrice: receiptFinalPrice,
+    drainQuantity: drainQuantity,
+    drainAveragePrice: drainAveragePrice,
+    drainFinalPrice: drainFinalPrice,
+    oneProfit: oneProfit,
+    allProfit: allProfit,
+    lastBalance: lastBalance,
+  });
 });
 
 exports.getUserIsBasketTransactions = asyncHandler(async (req, res, next) => {
