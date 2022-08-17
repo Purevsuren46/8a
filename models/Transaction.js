@@ -18,6 +18,9 @@ const TransactionSchema = new mongoose.Schema(
     balanceGoodNumber: {
       type: Number
     },
+    goodName: {
+      type: String
+    },
     isBasket: {
       type: Boolean,
       default: false

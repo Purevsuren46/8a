@@ -111,6 +111,85 @@ exports.getAllProfit = asyncHandler(async (req, res, next) => {
   let allProfit = oneProfit * drainQuantity
   let lastBalance = transactions[transactions.length - 1].balanceGoodNumber
 
+  const goods = await Good.find({createUser: req.userId})
+  let goodProfits = []
+  for (let i = 0; i < goods.length; i++) {
+    req.query.sort = "createdAt"
+    const sort = req.query.sort;
+    const select = req.query.select;
+    ["select", "sort", "page", "limit"].forEach((el) => delete req.query[el]);
+    
+  
+    const transactions = await Transaction.find({createUser: req.userId, isBasket: true, good: goods[i].id})    
+    .sort(sort)
+    .limit(limit);
+  
+    const receipts = await Transaction.find({createUser: req.userId, type: "Орлого", isBasket: true, good: goods[i].id})    
+      .sort(sort)
+      .limit(limit);
+  
+    const drains = await Transaction.find({createUser: req.userId, type: "Зарлага", isBasket: true, good: goods[i].id})
+      .sort(sort)
+      .limit(limit);
+      
+    if(transactions.length == 0) {
+      goodProfits.push({
+        good: goods[i].name,
+        firstBalance: 0,
+        receiptQuantity: 0,
+        receiptAveragePrice: 0,
+        receiptFinalPrice: 0,
+        drainQuantity: 0,
+        drainAveragePrice: 0,
+        drainFinalPrice: 0,
+        oneProfit: 0,
+        allProfit: 0,
+        lastBalance: 0,
+      }) 
+    } else {
+      let last = 0
+      if(transactions[0].type == "Орлого") {
+        last = transactions[0].balanceGoodNumber - transactions[0].quantity
+      } else {
+        last = transactions[0].balanceGoodNumber + transactions[0].quantity
+      }
+      
+      let receiptFinalPrice = 0
+      let receiptQuantity = 0
+      for (let i = 0; i < receipts.length; i++) {
+        receiptFinalPrice += receipts[i].finalPrice
+        receiptQuantity += receipts[i].quantity
+      }
+      let drainFinalPrice = 0
+      let drainQuantity = 0
+    
+      for (let i = 0; i < receipts.length; i++) {
+        drainFinalPrice += drains[i].finalPrice
+        drainQuantity += drains[i].quantity
+      }
+      let receiptAveragePrice = receiptFinalPrice / receiptQuantity
+      let drainAveragePrice = drainFinalPrice / drainQuantity
+      let oneProfit = drainAveragePrice - receiptAveragePrice
+      let allProfit = oneProfit * drainQuantity
+      let lastBalance = transactions[transactions.length - 1].balanceGoodNumber
+  
+      goodProfits.push({
+        good: goods[i].name,
+        firstBalance: last,
+        receiptQuantity: receiptQuantity,
+        receiptAveragePrice: receiptAveragePrice,
+        receiptFinalPrice: receiptFinalPrice,
+        drainQuantity: drainQuantity,
+        drainAveragePrice: drainAveragePrice,
+        drainFinalPrice: drainFinalPrice,
+        oneProfit: oneProfit,
+        allProfit: allProfit,
+        lastBalance: lastBalance,
+      })
+    }
+
+  }
+
 
 
 
@@ -126,6 +205,7 @@ exports.getAllProfit = asyncHandler(async (req, res, next) => {
     oneProfit: oneProfit,
     allProfit: allProfit,
     lastBalance: lastBalance,
+    goodsProfits: goodProfits,
   });
 });
 
