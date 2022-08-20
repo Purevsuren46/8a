@@ -290,9 +290,13 @@ exports.updateBill = asyncHandler(async (req, res, next) => {
     throw new MyError(req.params.id + " ID-тэй ном байхгүйээээ.", 400);
   }
 
-  if (bill.createUser.toString() !== req.userId && req.userRole !== "admin") {
+  if (bill.createUser.toString() !== req.userId) {
     throw new MyError("Та зөвхөн өөрийнхөө номыг л засварлах эрхтэй", 403);
   }
+  const newBill = await Bill.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+    runValidators: true,
+  });
 
   req.body.updateUser = req.userId;
 
@@ -301,6 +305,6 @@ exports.updateBill = asyncHandler(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    data: bill,
+    data: newBill,
   });
 });

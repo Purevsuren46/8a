@@ -37,7 +37,7 @@ router
 router
   .route("/:id")
   .delete(protect, deleteBill)
-  .put(protect, authorize("admin"), updateBill);
+  .put(protect, updateBill);
 
 
 

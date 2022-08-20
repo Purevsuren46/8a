@@ -31,6 +31,13 @@ const BillSchema = new mongoose.Schema(
     loanDate: {
       type: Date,
     },
+    isPaid: {
+      type: Boolean,
+      default: false
+    },
+    paidDate: {
+      type: Date,
+    },
     type: {
         type: String,
         enum: ["Орлого", "Зарлага"]
