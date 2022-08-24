@@ -40,6 +40,63 @@ exports.getUserBills = asyncHandler(async (req, res, next) => {
   return this.getBills(req, res, next);
 });
 
+exports.getUserDebts = asyncHandler(async (req, res, next) => {
+  req.query.createUser = req.userId;
+  req.query.incomeType = "Зээл"
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 5;
+  const sort = req.query.sort;
+  const select = req.query.select;
+
+  ["select", "sort", "page", "limit"].forEach((el) => delete req.query[el]);
+
+  const pagination = await paginate(page, limit, Bill);
+
+  const bills = await Bill.find(req.query, select)
+    .populate({
+      path: "transaction",
+      select: "name averagePrice",
+    })
+    .sort(sort)
+    .skip(pagination.start - 1)
+    .limit(limit);
+
+  const debtsList = []
+    for (let i = 0; i<bills.length; i++) {
+      if (bills[i].isPaid == true) {
+        debtsList.push([
+          bills[i].loanName,
+          bills[i].loanPhone,
+          bills[i].loanSize,
+          bills[i].loanDate,
+          "Төлсөн",
+          bills[i].createdAt,
+          bills[i].id,
+        ])
+      } else {
+        debtsList.push([
+          bills[i].loanName,
+          bills[i].loanPhone,
+          bills[i].loanSize,
+          bills[i].loanDate,
+          "Төлөөгүй",
+          bills[i].createdAt,
+          bills[i].id,
+        ])
+      }
+
+    }
+
+
+  res.status(200).json({
+    success: true,
+    count: bills.length,
+    debtsList: debtsList,
+    data: bills,
+    pagination,
+  });
+});
+
 exports.getUserReceipts = asyncHandler(async (req, res, next) => {
     req.query.createUser = req.userId;
     req.query.type = "Орлого";

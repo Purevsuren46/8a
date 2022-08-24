@@ -5,6 +5,7 @@ const {
   getBills,
   getBill,
   getUserBills,
+  getUserDebts,
   getUserReceipts,
   getUserDrains,
   createReceipt,
@@ -29,6 +30,10 @@ router
   .route("/drain")
   .get(protect, getUserDrains)
   .post(protect, createDrain);
+
+router
+  .route("/debt")
+  .get(protect, getUserDebts)
 
 router
   .route("/user")
