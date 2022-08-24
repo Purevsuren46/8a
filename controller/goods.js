@@ -25,9 +25,21 @@ exports.getGoods = asyncHandler(async (req, res, next) => {
     .skip(pagination.start - 1)
     .limit(limit);
 
+  const goodsList = []
+  for (let i = 0; i < goods.length; i++) {
+    goodsList.push([
+      goods[i].name,
+      goods[i].receipt,
+      goods[i].drain,
+      goods[i].quantity,
+      goods[i].id,
+    ])
+  }
+
   res.status(200).json({
     success: true,
     count: goods.length,
+    goodsList: goodsList,
     data: goods,
     pagination,
   });
