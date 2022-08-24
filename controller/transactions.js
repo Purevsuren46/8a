@@ -160,6 +160,7 @@ exports.getAllProfit = asyncHandler(async (req, res, next) => {
         0,
         0,
         0,
+        goods[i].id,
       ])
       goodMargins.push([
         goods[i].name,
@@ -167,6 +168,7 @@ exports.getAllProfit = asyncHandler(async (req, res, next) => {
         0,
         0,
         0,
+        goods[i].id,
       ])
       goodReceipts.push([
         goods[i].name,
@@ -177,6 +179,7 @@ exports.getAllProfit = asyncHandler(async (req, res, next) => {
         0,
         0,
         0,
+        goods[i].id,
       ])
     } else {
       let last = 0
@@ -231,6 +234,7 @@ exports.getAllProfit = asyncHandler(async (req, res, next) => {
         drainReceiptPrice,
         lastBalance,
         allLeftBalanceReceiptPrice,
+        goods[i].id,
       ])
       goodMargins.push([
         goods[i].name,
@@ -238,6 +242,7 @@ exports.getAllProfit = asyncHandler(async (req, res, next) => {
         drainFinalPrice,
         drainAveragePrice,
         allProfit,
+        goods[i].id,
       ])
       goodReceipts.push([
         goods[i].name,
@@ -248,6 +253,7 @@ exports.getAllProfit = asyncHandler(async (req, res, next) => {
         allProfit,
         lastBalance,
         allLeftBalanceReceiptPrice,
+        goods[i].id,
       ])
     }
 
