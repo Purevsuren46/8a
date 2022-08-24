@@ -70,9 +70,9 @@ exports.getUserDebts = asyncHandler(async (req, res, next) => {
           bills[i].loanName,
           bills[i].loanPhone,
           bills[i].loanSize,
+          moment(bills[i].createdAt).format("YYYY/MM/DD"),
           moment(bills[i].loanDate).fromNow(),
           "Төлсөн",
-          moment(bills[i].createdAt).format("YYYY/MM/DD"),
           bills[i].id,
         ])
       } else {
@@ -80,9 +80,9 @@ exports.getUserDebts = asyncHandler(async (req, res, next) => {
           bills[i].loanName,
           bills[i].loanPhone,
           bills[i].loanSize,
+          moment(bills[i].createdAt).format("YYYY/MM/DD"),
           moment(bills[i].loanDate).fromNow(),
           "Төлөөгүй",
-          moment(bills[i].createdAt).format("YYYY/MM/DD"),
           bills[i].id,
         ])
       }

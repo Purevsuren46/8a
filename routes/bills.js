@@ -21,6 +21,10 @@ router
   .route("/")
   .get(protect, getBills)
 
+  router
+  .route("/:id")
+  .get(protect, getBill)
+
 router
   .route("/receipt")
   .get(protect, getUserReceipts)
