@@ -114,6 +114,8 @@ exports.getAllProfit = asyncHandler(async (req, res, next) => {
   const goods = await Good.find({createUser: req.userId})
   let goodProfits = []
   let goodLists = []
+  let goodMargins = []
+  let goodReceipts = []
   for (let i = 0; i < goods.length; i++) {
     req.query.sort = "createdAt"
     const sort = req.query.sort;
@@ -150,6 +152,23 @@ exports.getAllProfit = asyncHandler(async (req, res, next) => {
         lastBalance: 0,
       }) 
       goodLists.push([
+        goods[i].name,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+      ])
+      goodMargins.push([
+        goods[i].name,
+        0,
+        0,
+        0,
+        0,
+      ])
+      goodReceipts.push([
         goods[i].name,
         0,
         0,
@@ -213,6 +232,23 @@ exports.getAllProfit = asyncHandler(async (req, res, next) => {
         lastBalance,
         allLeftBalanceReceiptPrice,
       ])
+      goodMargins.push([
+        goods[i].name,
+        drainQuantity,
+        drainFinalPrice,
+        drainAveragePrice,
+        allProfit,
+      ])
+      goodReceipts.push([
+        goods[i].name,
+        receiptQuantity,
+        receiptFinalPrice,
+        drainQuantity,
+        drainFinalPrice,
+        allProfit,
+        lastBalance,
+        allLeftBalanceReceiptPrice,
+      ])
     }
 
   }
@@ -231,6 +267,8 @@ exports.getAllProfit = asyncHandler(async (req, res, next) => {
     lastBalance: lastBalance,
     goodsProfits: goodProfits,
     goodsLists: goodLists,
+    goodsMargins: goodMargins,
+    goodsReceipts: goodReceipts,
   });
 });
 
