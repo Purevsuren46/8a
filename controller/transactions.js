@@ -113,6 +113,7 @@ exports.getAllProfit = asyncHandler(async (req, res, next) => {
 
   const goods = await Good.find({createUser: req.userId})
   let goodProfits = []
+  let goodLists = []
   for (let i = 0; i < goods.length; i++) {
     req.query.sort = "createdAt"
     const sort = req.query.sort;
@@ -144,8 +145,20 @@ exports.getAllProfit = asyncHandler(async (req, res, next) => {
         drainFinalPrice: 0,
         oneProfit: 0,
         allProfit: 0,
+        drainReceiptPrice: 0,
+        allLeftBalanceReceiptPrice: 0,
         lastBalance: 0,
       }) 
+      goodLists.push([
+        goods[i].name,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+      ])
     } else {
       let last = 0
       if(transactions[0].type == "Орлого") {
@@ -172,6 +185,8 @@ exports.getAllProfit = asyncHandler(async (req, res, next) => {
       let oneProfit = drainAveragePrice - receiptAveragePrice
       let allProfit = oneProfit * drainQuantity
       let lastBalance = transactions[transactions.length - 1].balanceGoodNumber
+      let drainReceiptPrice = drainQuantity * receiptAveragePrice
+      let allLeftBalanceReceiptPrice =  lastBalance * receiptAveragePrice
   
       goodProfits.push({
         good: goods[i].name,
@@ -184,8 +199,20 @@ exports.getAllProfit = asyncHandler(async (req, res, next) => {
         drainFinalPrice: drainFinalPrice,
         oneProfit: oneProfit,
         allProfit: allProfit,
+        drainReceiptPrice: drainReceiptPrice,
+        allLeftBalanceReceiptPrice: allLeftBalanceReceiptPrice,
         lastBalance: lastBalance,
       })
+      goodLists.push([
+        goods[i].name,
+        receiptQuantity,
+        receiptFinalPrice,
+        receiptAveragePrice,
+        drainQuantity,
+        drainReceiptPrice,
+        lastBalance,
+        allLeftBalanceReceiptPrice,
+      ])
     }
 
   }
@@ -203,6 +230,7 @@ exports.getAllProfit = asyncHandler(async (req, res, next) => {
     allProfit: allProfit,
     lastBalance: lastBalance,
     goodsProfits: goodProfits,
+    goodsLists: goodLists,
   });
 });
 
