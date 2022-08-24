@@ -108,6 +108,9 @@ exports.createDebtPayment = asyncHandler(async (req, res, next) => {
   if(req.body.amount) {
     req.body.before = questionnaire.loanSize
     questionnaire.loanSize -= req.body.amount
+    if (questionnaire.loanSize < 1) {
+      questionnaire.isPaid = true
+    }
   }
 
   questionnaire.deptHistory.push(req.body)
@@ -170,11 +173,18 @@ exports.getUserDrains = asyncHandler(async (req, res, next) => {
 
 exports.getBill = asyncHandler(async (req, res, next) => {
   const bill = await Bill.findById(req.params.id);
-  // const depts = await Bill.find({createdAt: req.userId, incomeType: "Зээл", type: "Орлого"});
-  // const receipts = await Bill.find({createdAt: req.userId, incomeType: "Зээл", type: "Зарлага"});
-  // for (let i = 0; i>depts.length; i++) {
+  const depts = await Bill.find({createUser: req.userId, incomeType: "Зээл", type: "Орлого", isPaid: false});
+  const receipts = await Bill.find({createUser: req.userId, incomeType: "Зээл", type: "Зарлага", isPaid: false});
+  let dept = 0
+  let receipt = 0
 
-  // }
+  
+  for (let i = 0; i<depts.length; i++) {
+    dept += depts[i].loanSize 
+  }
+  for (let i = 0; i<receipts.length; i++) {
+    receipt += receipts[i].loanSize 
+  }
   if (!bill) {
     throw new MyError(req.params.id + " ID-тэй ном байхгүй байна.", 404);
   }
@@ -182,6 +192,8 @@ exports.getBill = asyncHandler(async (req, res, next) => {
   res.status(200).json({
     success: true,
     data: bill,
+    dept: dept,
+    receipt: receipt,
   });
 });
 
