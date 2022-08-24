@@ -101,7 +101,7 @@ exports.getAllProfit = asyncHandler(async (req, res, next) => {
   let drainFinalPrice = 0
   let drainQuantity = 0
 
-  for (let i = 0; i < receipts.length; i++) {
+  for (let i = 0; i < drains.length; i++) {
     drainFinalPrice += drains[i].finalPrice
     drainQuantity += drains[i].quantity
   }
@@ -163,7 +163,7 @@ exports.getAllProfit = asyncHandler(async (req, res, next) => {
       let drainFinalPrice = 0
       let drainQuantity = 0
     
-      for (let i = 0; i < receipts.length; i++) {
+      for (let i = 0; i < drains.length; i++) {
         drainFinalPrice += drains[i].finalPrice
         drainQuantity += drains[i].quantity
       }
@@ -248,7 +248,7 @@ exports.getAllGoodProfit = asyncHandler(async (req, res, next) => {
   let drainFinalPrice = 0
   let drainQuantity = 0
 
-  for (let i = 0; i < receipts.length; i++) {
+  for (let i = 0; i < drains.length; i++) {
     drainFinalPrice += drains[i].finalPrice
     drainQuantity += drains[i].quantity
   }
