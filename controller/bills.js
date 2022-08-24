@@ -99,6 +99,63 @@ exports.getUserDebts = asyncHandler(async (req, res, next) => {
   });
 });
 
+exports.createDebtPayment = asyncHandler(async (req, res, next) => {
+  const questionnaire = await Bill.findOne({_id: req.params.id});
+
+  if (!questionnaire) {
+    throw new MyError(req.params.id + " ID-тэй хэрэглэгч байхгүйээээ.", 400);
+  }
+  if(req.body.amount) {
+    req.body.before = questionnaire.loanSize
+    questionnaire.loanSize -= req.body.amount
+  }
+
+  questionnaire.deptHistory.push(req.body)
+  questionnaire.save()
+
+  res.status(200).json({
+    success: true,
+    data: questionnaire,
+  });
+});
+
+exports.deleteDebtPayment = asyncHandler(async (req, res, next) => {
+  const questionnaire = await Bill.findOne({_id: req.params.id});
+
+  if (!questionnaire) {
+    throw new MyError(req.params.id + " ID-тэй хэрэглэгч байхгүйээээ.", 400);
+  }
+  if(req.body.amount) {
+    questionnaire.loanSize += req.body.amount
+  }
+  questionnaire.deptHistory.pull({_id: req.params.id2})
+  questionnaire.save()
+
+  res.status(200).json({
+    success: true,
+    data: questionnaire,
+  });
+});
+
+exports.updateDebtPayment = asyncHandler(async (req, res, next) => {
+  const questionnaire = await Bill.findOne({_id: req.params.id});
+
+  if (!questionnaire) {
+    throw new MyError(req.params.id + " ID-тэй хэрэглэгч байхгүйээээ.", 400);
+  }
+
+
+
+  const number = questionnaire.deptHistory.findIndex((obj => obj._id == req.params.id2))
+  questionnaire.deptHistory[number] = req.body
+  questionnaire.save()
+
+  res.status(200).json({
+    success: true,
+    data: questionnaire,
+  });
+});
+
 exports.getUserReceipts = asyncHandler(async (req, res, next) => {
     req.query.createUser = req.userId;
     req.query.type = "Орлого";
@@ -113,7 +170,11 @@ exports.getUserDrains = asyncHandler(async (req, res, next) => {
 
 exports.getBill = asyncHandler(async (req, res, next) => {
   const bill = await Bill.findById(req.params.id);
+  const depts = await Bill.find({createdAt: req.userId, incomeType: "Зээл", type: "Орлого"});
+  const receipts = await Bill.find({createdAt: req.userId, incomeType: "Зээл", type: "Зарлага"});
+  for (let i = 0; i>depts.length; i++) {
 
+  }
   if (!bill) {
     throw new MyError(req.params.id + " ID-тэй ном байхгүй байна.", 404);
   }

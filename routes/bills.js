@@ -4,6 +4,9 @@ const { protect, authorize } = require("../middleware/protect");
 const {
   getBills,
   getBill,
+  createDebtPayment,
+  deleteDebtPayment,
+  updateDebtPayment,
   getUserBills,
   getUserDebts,
   getUserReceipts,
@@ -34,6 +37,15 @@ router
 router
   .route("/debt")
   .get(protect, getUserDebts)
+
+router
+  .route("/debt/:id")
+  .post(protect, createDebtPayment)
+
+router
+  .route("/debt/:id/:id2")
+  .put(protect, updateDebtPayment)
+  .delete(protect, deleteDebtPayment)
 
 router
   .route("/user")

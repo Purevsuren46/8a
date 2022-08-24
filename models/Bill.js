@@ -28,6 +28,9 @@ const BillSchema = new mongoose.Schema(
     loanSize: {
       type: Number,
     },
+    loanRemaining: {
+      type: Number,
+    },
     loanDate: {
       type: Date,
     },
@@ -50,6 +53,19 @@ const BillSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
+    deptHistory: [{
+      createdAt: {
+      type: Date,
+      default: Date.now,
+      },
+      amount: {
+        type: Number
+      },
+      before: {
+        type: Number
+      }
+
+    }]
   },
   { toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
