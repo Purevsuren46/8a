@@ -170,11 +170,11 @@ exports.getUserDrains = asyncHandler(async (req, res, next) => {
 
 exports.getBill = asyncHandler(async (req, res, next) => {
   const bill = await Bill.findById(req.params.id);
-  const depts = await Bill.find({createdAt: req.userId, incomeType: "Зээл", type: "Орлого"});
-  const receipts = await Bill.find({createdAt: req.userId, incomeType: "Зээл", type: "Зарлага"});
-  for (let i = 0; i>depts.length; i++) {
+  // const depts = await Bill.find({createdAt: req.userId, incomeType: "Зээл", type: "Орлого"});
+  // const receipts = await Bill.find({createdAt: req.userId, incomeType: "Зээл", type: "Зарлага"});
+  // for (let i = 0; i>depts.length; i++) {
 
-  }
+  // }
   if (!bill) {
     throw new MyError(req.params.id + " ID-тэй ном байхгүй байна.", 404);
   }
