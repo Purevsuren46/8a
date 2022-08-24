@@ -21,10 +21,6 @@ router
   .route("/")
   .get(protect, getBills)
 
-  router
-  .route("/:id")
-  .get(protect, getBill)
-
 router
   .route("/receipt")
   .get(protect, getUserReceipts)
@@ -45,6 +41,7 @@ router
 
 router
   .route("/:id")
+  .get(protect, getBill)
   .delete(protect, deleteBill)
   .put(protect, updateBill);
 
