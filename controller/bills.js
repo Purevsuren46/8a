@@ -6,6 +6,8 @@ const MyError = require("../utils/myError");
 const asyncHandler = require("express-async-handler");
 const paginate = require("../utils/paginate");
 const User = require("../models/User");
+const moment = require("moment");
+moment.locale("mn")
 
 // api/v1/bills
 exports.getBills = asyncHandler(async (req, res, next) => {
@@ -68,9 +70,9 @@ exports.getUserDebts = asyncHandler(async (req, res, next) => {
           bills[i].loanName,
           bills[i].loanPhone,
           bills[i].loanSize,
-          bills[i].loanDate,
+          moment(bills[i].loanDate).fromNow(),
           "Төлсөн",
-          bills[i].createdAt,
+          moment(bills[i].createdAt).format("YYYY/MM/DD"),
           bills[i].id,
         ])
       } else {
@@ -78,9 +80,9 @@ exports.getUserDebts = asyncHandler(async (req, res, next) => {
           bills[i].loanName,
           bills[i].loanPhone,
           bills[i].loanSize,
-          bills[i].loanDate,
+          moment(bills[i].loanDate).fromNow(),
           "Төлөөгүй",
-          bills[i].createdAt,
+          moment(bills[i].createdAt).format("YYYY/MM/DD"),
           bills[i].id,
         ])
       }
