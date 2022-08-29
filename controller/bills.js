@@ -69,7 +69,7 @@ exports.getUserDebts = asyncHandler(async (req, res, next) => {
         debtsList.push([
           bills[i].loanName,
           bills[i].loanPhone,
-          bills[i].loanSize,
+          Math.floor(bills[i].loanSize),
           moment(bills[i].createdAt).format("YYYY/MM/DD"),
           moment(bills[i].loanDate).fromNow(),
           "Төлсөн",
@@ -79,7 +79,7 @@ exports.getUserDebts = asyncHandler(async (req, res, next) => {
         debtsList.push([
           bills[i].loanName,
           bills[i].loanPhone,
-          bills[i].loanSize,
+          Math.floor(bills[i].loanSize),
           moment(bills[i].createdAt).format("YYYY/MM/DD"),
           moment(bills[i].loanDate).fromNow(),
           "Төлөөгүй",
@@ -239,6 +239,7 @@ exports.createReceipt = asyncHandler(async (req, res, next) => {
 
   
       const good = await Good.findById(transactions.good)
+
       good.quantity += transactions.quantity
       good.receipt += transactions.quantity
       transactions.balanceGoodNumber = good.quantity
@@ -271,11 +272,14 @@ exports.createReceipt = asyncHandler(async (req, res, next) => {
       }
   
       const good = await Good.findById(transactions[i].good)
-      good.quantity += transactions[i].quantity
-      good.receipt += transactions[i].quantity
-      transactions[i].balanceGoodNumber = good.quantity
-      good.save()
-      transactions[i].save()
+      if(good) {
+        good.quantity += transactions[i].quantity
+        good.receipt += transactions[i].quantity
+        transactions[i].balanceGoodNumber = good.quantity
+        good.save()
+        transactions[i].save()
+      }
+
     }
     for(let i = 0; i < transactions.length;  i++) {
       bill.finalPrice += transactions[i].finalPrice
