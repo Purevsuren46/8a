@@ -128,9 +128,11 @@ exports.deleteDebtPayment = asyncHandler(async (req, res, next) => {
   if (!questionnaire) {
     throw new MyError(req.params.id + " ID-тэй хэрэглэгч байхгүйээээ.", 400);
   }
-  if(req.body.amount) {
-    questionnaire.loanSize += req.body.amount
-  }
+
+  const number = questionnaire.deptHistory.findIndex((obj => obj._id == req.params.id2))
+
+  const amount = questionnaire.deptHistory[number].amount
+  questionnaire.loanSize += amount
   questionnaire.deptHistory.pull({_id: req.params.id2})
   questionnaire.save()
 
