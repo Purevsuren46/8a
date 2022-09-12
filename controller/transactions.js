@@ -278,29 +278,27 @@ exports.getAllProfit = asyncHandler(async (req, res, next) => {
   });
 });
 
-exports.getAllGoodProfit = asyncHandler(async (req, res, next) => {
+exports.getAllByTimeProfit = asyncHandler(async (req, res, next) => {
+  const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 5;
   req.query.sort = "createdAt"
   const sort = req.query.sort;
+  const select = req.query.select;
   ["select", "sort", "page", "limit"].forEach((el) => delete req.query[el]);
-
-  if(!req.params.id) {
-    throw new MyError("Бараагаа оруул", 404);
-  }
   
 
-  const transactions = await Transaction.find({createUser: req.userId, isBasket: true, good: req.params.id})    
+  const transactions = await Transaction.find({createUser: req.userId, isBasket: true, createdAt: {$gte: new Date(req.body.date1), $lte: new Date(req.body.date2)}})    
   .sort(sort)
   .limit(limit);
 
-  const receipts = await Transaction.find({createUser: req.userId, type: "Орлого", isBasket: true, good: req.params.id})    
+  const receipts = await Transaction.find({createUser: req.userId, type: "Орлого", isBasket: true, createdAt: {$gte: new Date(req.body.date1), $lte: new Date(req.body.date2)}})    
     .sort(sort)
     .limit(limit);
 
-  const drains = await Transaction.find({createUser: req.userId, type: "Зарлага", isBasket: true, good: req.params.id})
+  const drains = await Transaction.find({createUser: req.userId, type: "Зарлага", isBasket: true, createdAt: {$gte: new Date(req.body.date1), $lte: new Date(req.body.date2)}})
     .sort(sort)
     .limit(limit);
-
+    
   if(transactions.length == 0) {
     throw new MyError("Бараанд борлуулалтын түүх алга", 404);
   }
@@ -330,8 +328,153 @@ exports.getAllGoodProfit = asyncHandler(async (req, res, next) => {
   let allProfit = oneProfit * drainQuantity
   let lastBalance = transactions[transactions.length - 1].balanceGoodNumber
 
+  const goods = await Good.find({createUser: req.userId})
+  let goodProfits = []
+  let goodLists = []
+  let goodMargins = []
+  let goodReceipts = []
+  for (let i = 0; i < goods.length; i++) {
+    req.query.sort = "createdAt"
+    const sort = req.query.sort;
+    const select = req.query.select;
+    ["select", "sort", "page", "limit"].forEach((el) => delete req.query[el]);
+    
+  
+    const transactions = await Transaction.find({createUser: req.userId, isBasket: true, good: goods[i].id, createdAt: {$gte: new Date(req.body.date1), $lte: new Date(req.body.date2)}})    
+    .sort(sort)
+    .limit(limit);
+  
+    const receipts = await Transaction.find({createUser: req.userId, type: "Орлого", isBasket: true, good: goods[i].id, createdAt: {$gte: new Date(req.body.date1), $lte: new Date(req.body.date2)}})    
+      .sort(sort)
+      .limit(limit);
+  
+    const drains = await Transaction.find({createUser: req.userId, type: "Зарлага", isBasket: true, good: goods[i].id, createdAt: {$gte: new Date(req.body.date1), $lte: new Date(req.body.date2)}})
+      .sort(sort)
+      .limit(limit);
+      
+    if(transactions.length == 0) {
+      goodProfits.push({
+        good: goods[i].name,
+        firstBalance: 0,
+        receiptQuantity: 0,
+        receiptAveragePrice: 0,
+        receiptFinalPrice: 0,
+        drainQuantity: 0,
+        drainAveragePrice: 0,
+        drainFinalPrice: 0,
+        oneProfit: 0,
+        allProfit: 0,
+        drainReceiptPrice: 0,
+        allLeftBalanceReceiptPrice: 0,
+        lastBalance: 0,
+      }) 
+      goodLists.push([
+        goods[i].name,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        goods[i].id,
+      ])
+      goodMargins.push([
+        goods[i].name,
+        0,
+        0,
+        0,
+        0,
+        goods[i].id,
+      ])
+      goodReceipts.push([
+        goods[i].name,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        goods[i].id,
+      ])
+    } else {
+      let last = 0
+      if(transactions[0].type == "Орлого") {
+        last = transactions[0].balanceGoodNumber - transactions[0].quantity
+      } else {
+        last = transactions[0].balanceGoodNumber + transactions[0].quantity
+      }
+      
+      let receiptFinalPrice = 0
+      let receiptQuantity = 0
+      for (let i = 0; i < receipts.length; i++) {
+        receiptFinalPrice += receipts[i].finalPrice
+        receiptQuantity += receipts[i].quantity
+      }
+      let drainFinalPrice = 0
+      let drainQuantity = 0
+    
+      for (let i = 0; i < drains.length; i++) {
+        drainFinalPrice += drains[i].finalPrice
+        drainQuantity += drains[i].quantity
+      }
+      let receiptAveragePrice = receiptFinalPrice / receiptQuantity
+      let drainAveragePrice = drainFinalPrice / drainQuantity
+      let oneProfit = drainAveragePrice - receiptAveragePrice
+      let allProfit = oneProfit * drainQuantity
+      let lastBalance = transactions[transactions.length - 1].balanceGoodNumber
+      let drainReceiptPrice = drainQuantity * receiptAveragePrice
+      let allLeftBalanceReceiptPrice =  lastBalance * receiptAveragePrice
+  
+      goodProfits.push({
+        good: goods[i].name,
+        firstBalance: last,
+        receiptQuantity: receiptQuantity,
+        receiptAveragePrice: receiptAveragePrice,
+        receiptFinalPrice: receiptFinalPrice,
+        drainQuantity: drainQuantity,
+        drainAveragePrice: drainAveragePrice,
+        drainFinalPrice: drainFinalPrice,
+        oneProfit: oneProfit,
+        allProfit: allProfit,
+        drainReceiptPrice: drainReceiptPrice,
+        allLeftBalanceReceiptPrice: allLeftBalanceReceiptPrice,
+        lastBalance: lastBalance,
+      })
+      goodLists.push([
+        goods[i].name,
+        Math.floor(receiptQuantity),
+        Math.floor(receiptFinalPrice),
+        Math.floor(receiptAveragePrice),
+        Math.floor(drainQuantity),
+        Math.floor(drainReceiptPrice),
+        Math.floor(lastBalance),
+        Math.floor(allLeftBalanceReceiptPrice),
+        goods[i].id,
+      ])
+      goodMargins.push([
+        goods[i].name,
+        Math.floor(drainQuantity),
+        Math.floor(drainFinalPrice),
+        Math.floor(drainAveragePrice),
+        Math.floor(allProfit),
+        goods[i].id,
+      ])
+      goodReceipts.push([
+        goods[i].name,
+        Math.floor(receiptQuantity),
+        Math.floor(receiptFinalPrice),
+        Math.floor(drainQuantity),
+        Math.floor(drainFinalPrice),
+        Math.floor(allProfit),
+        Math.floor(lastBalance),
+        Math.floor(allLeftBalanceReceiptPrice),
+        goods[i].id,
+      ])
+    }
 
-
+  }
 
   res.status(200).json({
     success: true,
@@ -345,6 +488,450 @@ exports.getAllGoodProfit = asyncHandler(async (req, res, next) => {
     oneProfit: oneProfit,
     allProfit: allProfit,
     lastBalance: lastBalance,
+    goodsProfits: goodProfits,
+    goodsLists: goodLists,
+    goodsMargins: goodMargins,
+    goodsReceipts: goodReceipts,
+  });
+});
+
+exports.getAllCategoryProfit = asyncHandler(async (req, res, next) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 5;
+  req.query.sort = "createdAt"
+  const sort = req.query.sort;
+  const select = req.query.select;
+  ["select", "sort", "page", "limit"].forEach((el) => delete req.query[el]);
+  const good = []
+  const goods = await Good.find({createUser: req.userId, category: req.params.id})
+  for(let i = 0; i<goods.length; i++) {
+    good.push(goods[i].id)
+  }
+
+  const transactions = await Transaction.find({createUser: req.userId, isBasket: true, good: good})    
+  .sort(sort)
+  .limit(limit);
+
+  const receipts = await Transaction.find({createUser: req.userId, type: "Орлого", isBasket: true, good: good})    
+    .sort(sort)
+    .limit(limit);
+
+  const drains = await Transaction.find({createUser: req.userId, type: "Зарлага", isBasket: true, good: good})
+    .sort(sort)
+    .limit(limit);
+    
+  if(transactions.length == 0) {
+    throw new MyError("Бараанд борлуулалтын түүх алга", 404);
+  }
+  let last = 0
+  if(transactions[0].type == "Орлого") {
+    last = transactions[0].balanceGoodNumber - transactions[0].quantity
+  } else {
+    last = transactions[0].balanceGoodNumber + transactions[0].quantity
+  }
+  
+  let receiptFinalPrice = 0
+  let receiptQuantity = 0
+  for (let i = 0; i < receipts.length; i++) {
+    receiptFinalPrice += receipts[i].finalPrice
+    receiptQuantity += receipts[i].quantity
+  }
+  let drainFinalPrice = 0
+  let drainQuantity = 0
+
+  for (let i = 0; i < drains.length; i++) {
+    drainFinalPrice += drains[i].finalPrice
+    drainQuantity += drains[i].quantity
+  }
+  let receiptAveragePrice = receiptFinalPrice / receiptQuantity
+  let drainAveragePrice = drainFinalPrice / drainQuantity
+  let oneProfit = drainAveragePrice - receiptAveragePrice
+  let allProfit = oneProfit * drainQuantity
+  let lastBalance = transactions[transactions.length - 1].balanceGoodNumber
+
+  let goodProfits = []
+  let goodLists = []
+  let goodMargins = []
+  let goodReceipts = []
+  for (let i = 0; i < goods.length; i++) {
+    req.query.sort = "createdAt"
+    const sort = req.query.sort;
+    const select = req.query.select;
+    ["select", "sort", "page", "limit"].forEach((el) => delete req.query[el]);
+    
+  
+    const transactions = await Transaction.find({createUser: req.userId, isBasket: true, good: goods[i].id})    
+    .sort(sort)
+    .limit(limit);
+  
+    const receipts = await Transaction.find({createUser: req.userId, type: "Орлого", isBasket: true, good: goods[i].id})    
+      .sort(sort)
+      .limit(limit);
+  
+    const drains = await Transaction.find({createUser: req.userId, type: "Зарлага", isBasket: true, good: goods[i].id})
+      .sort(sort)
+      .limit(limit);
+      
+    if(transactions.length == 0) {
+      goodProfits.push({
+        good: goods[i].name,
+        firstBalance: 0,
+        receiptQuantity: 0,
+        receiptAveragePrice: 0,
+        receiptFinalPrice: 0,
+        drainQuantity: 0,
+        drainAveragePrice: 0,
+        drainFinalPrice: 0,
+        oneProfit: 0,
+        allProfit: 0,
+        drainReceiptPrice: 0,
+        allLeftBalanceReceiptPrice: 0,
+        lastBalance: 0,
+      }) 
+      goodLists.push([
+        goods[i].name,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        goods[i].id,
+      ])
+      goodMargins.push([
+        goods[i].name,
+        0,
+        0,
+        0,
+        0,
+        goods[i].id,
+      ])
+      goodReceipts.push([
+        goods[i].name,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        goods[i].id,
+      ])
+    } else {
+      let last = 0
+      if(transactions[0].type == "Орлого") {
+        last = transactions[0].balanceGoodNumber - transactions[0].quantity
+      } else {
+        last = transactions[0].balanceGoodNumber + transactions[0].quantity
+      }
+      
+      let receiptFinalPrice = 0
+      let receiptQuantity = 0
+      for (let i = 0; i < receipts.length; i++) {
+        receiptFinalPrice += receipts[i].finalPrice
+        receiptQuantity += receipts[i].quantity
+      }
+      let drainFinalPrice = 0
+      let drainQuantity = 0
+    
+      for (let i = 0; i < drains.length; i++) {
+        drainFinalPrice += drains[i].finalPrice
+        drainQuantity += drains[i].quantity
+      }
+      let receiptAveragePrice = receiptFinalPrice / receiptQuantity
+      let drainAveragePrice = drainFinalPrice / drainQuantity
+      let oneProfit = drainAveragePrice - receiptAveragePrice
+      let allProfit = oneProfit * drainQuantity
+      let lastBalance = transactions[transactions.length - 1].balanceGoodNumber
+      let drainReceiptPrice = drainQuantity * receiptAveragePrice
+      let allLeftBalanceReceiptPrice =  lastBalance * receiptAveragePrice
+  
+      goodProfits.push({
+        good: goods[i].name,
+        firstBalance: last,
+        receiptQuantity: receiptQuantity,
+        receiptAveragePrice: receiptAveragePrice,
+        receiptFinalPrice: receiptFinalPrice,
+        drainQuantity: drainQuantity,
+        drainAveragePrice: drainAveragePrice,
+        drainFinalPrice: drainFinalPrice,
+        oneProfit: oneProfit,
+        allProfit: allProfit,
+        drainReceiptPrice: drainReceiptPrice,
+        allLeftBalanceReceiptPrice: allLeftBalanceReceiptPrice,
+        lastBalance: lastBalance,
+      })
+      goodLists.push([
+        goods[i].name,
+        Math.floor(receiptQuantity),
+        Math.floor(receiptFinalPrice),
+        Math.floor(receiptAveragePrice),
+        Math.floor(drainQuantity),
+        Math.floor(drainReceiptPrice),
+        Math.floor(lastBalance),
+        Math.floor(allLeftBalanceReceiptPrice),
+        goods[i].id,
+      ])
+      goodMargins.push([
+        goods[i].name,
+        Math.floor(drainQuantity),
+        Math.floor(drainFinalPrice),
+        Math.floor(drainAveragePrice),
+        Math.floor(allProfit),
+        goods[i].id,
+      ])
+      goodReceipts.push([
+        goods[i].name,
+        Math.floor(receiptQuantity),
+        Math.floor(receiptFinalPrice),
+        Math.floor(drainQuantity),
+        Math.floor(drainFinalPrice),
+        Math.floor(allProfit),
+        Math.floor(lastBalance),
+        Math.floor(allLeftBalanceReceiptPrice),
+        goods[i].id,
+      ])
+    }
+
+  }
+
+  res.status(200).json({
+    success: true,
+    firstBalance: last,
+    receiptQuantity: receiptQuantity,
+    receiptAveragePrice: receiptAveragePrice,
+    receiptFinalPrice: receiptFinalPrice,
+    drainQuantity: drainQuantity,
+    drainAveragePrice: drainAveragePrice,
+    drainFinalPrice: drainFinalPrice,
+    oneProfit: oneProfit,
+    allProfit: allProfit,
+    lastBalance: lastBalance,
+    goodsProfits: goodProfits,
+    goodsLists: goodLists,
+    goodsMargins: goodMargins,
+    goodsReceipts: goodReceipts,
+  });
+});
+
+exports.getAllCategoryByTimeProfit = asyncHandler(async (req, res, next) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 5;
+  req.query.sort = "createdAt"
+  const sort = req.query.sort;
+  const select = req.query.select;
+  ["select", "sort", "page", "limit"].forEach((el) => delete req.query[el]);
+  const good = []
+  const goods = await Good.find({createUser: req.userId, category: req.params.id})
+  for(let i = 0; i<goods.length; i++) {
+    good.push(goods[i].id)
+  }
+
+  const transactions = await Transaction.find({createUser: req.userId, isBasket: true, good: good, createdAt: {$gte: new Date(req.body.date1), $lte: new Date(req.body.date2)}})    
+  .sort(sort)
+  .limit(limit);
+
+  const receipts = await Transaction.find({createUser: req.userId, type: "Орлого", isBasket: true, good: good, createdAt: {$gte: new Date(req.body.date1), $lte: new Date(req.body.date2)}})    
+    .sort(sort)
+    .limit(limit);
+
+  const drains = await Transaction.find({createUser: req.userId, type: "Зарлага", isBasket: true, good: good, createdAt: {$gte: new Date(req.body.date1), $lte: new Date(req.body.date2)}})
+    .sort(sort)
+    .limit(limit);
+    
+  if(transactions.length == 0) {
+    throw new MyError("Бараанд борлуулалтын түүх алга", 404);
+  }
+  let last = 0
+  if(transactions[0].type == "Орлого") {
+    last = transactions[0].balanceGoodNumber - transactions[0].quantity
+  } else {
+    last = transactions[0].balanceGoodNumber + transactions[0].quantity
+  }
+  
+  let receiptFinalPrice = 0
+  let receiptQuantity = 0
+  for (let i = 0; i < receipts.length; i++) {
+    receiptFinalPrice += receipts[i].finalPrice
+    receiptQuantity += receipts[i].quantity
+  }
+  let drainFinalPrice = 0
+  let drainQuantity = 0
+
+  for (let i = 0; i < drains.length; i++) {
+    drainFinalPrice += drains[i].finalPrice
+    drainQuantity += drains[i].quantity
+  }
+  let receiptAveragePrice = receiptFinalPrice / receiptQuantity
+  let drainAveragePrice = drainFinalPrice / drainQuantity
+  let oneProfit = drainAveragePrice - receiptAveragePrice
+  let allProfit = oneProfit * drainQuantity
+  let lastBalance = transactions[transactions.length - 1].balanceGoodNumber
+
+  let goodProfits = []
+  let goodLists = []
+  let goodMargins = []
+  let goodReceipts = []
+  for (let i = 0; i < goods.length; i++) {
+    req.query.sort = "createdAt"
+    const sort = req.query.sort;
+    const select = req.query.select;
+    ["select", "sort", "page", "limit"].forEach((el) => delete req.query[el]);
+    
+  
+    const transactions = await Transaction.find({createUser: req.userId, isBasket: true, good: goods[i].id, createdAt: {$gte: new Date(req.body.date1), $lte: new Date(req.body.date2)}})    
+    .sort(sort)
+    .limit(limit);
+  
+    const receipts = await Transaction.find({createUser: req.userId, type: "Орлого", isBasket: true, good: goods[i].id, createdAt: {$gte: new Date(req.body.date1), $lte: new Date(req.body.date2)}})    
+      .sort(sort)
+      .limit(limit);
+  
+    const drains = await Transaction.find({createUser: req.userId, type: "Зарлага", isBasket: true, good: goods[i].id, createdAt: {$gte: new Date(req.body.date1), $lte: new Date(req.body.date2)}})
+      .sort(sort)
+      .limit(limit);
+      
+    if(transactions.length == 0) {
+      goodProfits.push({
+        good: goods[i].name,
+        firstBalance: 0,
+        receiptQuantity: 0,
+        receiptAveragePrice: 0,
+        receiptFinalPrice: 0,
+        drainQuantity: 0,
+        drainAveragePrice: 0,
+        drainFinalPrice: 0,
+        oneProfit: 0,
+        allProfit: 0,
+        drainReceiptPrice: 0,
+        allLeftBalanceReceiptPrice: 0,
+        lastBalance: 0,
+      }) 
+      goodLists.push([
+        goods[i].name,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        goods[i].id,
+      ])
+      goodMargins.push([
+        goods[i].name,
+        0,
+        0,
+        0,
+        0,
+        goods[i].id,
+      ])
+      goodReceipts.push([
+        goods[i].name,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        goods[i].id,
+      ])
+    } else {
+      let last = 0
+      if(transactions[0].type == "Орлого") {
+        last = transactions[0].balanceGoodNumber - transactions[0].quantity
+      } else {
+        last = transactions[0].balanceGoodNumber + transactions[0].quantity
+      }
+      
+      let receiptFinalPrice = 0
+      let receiptQuantity = 0
+      for (let i = 0; i < receipts.length; i++) {
+        receiptFinalPrice += receipts[i].finalPrice
+        receiptQuantity += receipts[i].quantity
+      }
+      let drainFinalPrice = 0
+      let drainQuantity = 0
+    
+      for (let i = 0; i < drains.length; i++) {
+        drainFinalPrice += drains[i].finalPrice
+        drainQuantity += drains[i].quantity
+      }
+      let receiptAveragePrice = receiptFinalPrice / receiptQuantity
+      let drainAveragePrice = drainFinalPrice / drainQuantity
+      let oneProfit = drainAveragePrice - receiptAveragePrice
+      let allProfit = oneProfit * drainQuantity
+      let lastBalance = transactions[transactions.length - 1].balanceGoodNumber
+      let drainReceiptPrice = drainQuantity * receiptAveragePrice
+      let allLeftBalanceReceiptPrice =  lastBalance * receiptAveragePrice
+  
+      goodProfits.push({
+        good: goods[i].name,
+        firstBalance: last,
+        receiptQuantity: receiptQuantity,
+        receiptAveragePrice: receiptAveragePrice,
+        receiptFinalPrice: receiptFinalPrice,
+        drainQuantity: drainQuantity,
+        drainAveragePrice: drainAveragePrice,
+        drainFinalPrice: drainFinalPrice,
+        oneProfit: oneProfit,
+        allProfit: allProfit,
+        drainReceiptPrice: drainReceiptPrice,
+        allLeftBalanceReceiptPrice: allLeftBalanceReceiptPrice,
+        lastBalance: lastBalance,
+      })
+      goodLists.push([
+        goods[i].name,
+        Math.floor(receiptQuantity),
+        Math.floor(receiptFinalPrice),
+        Math.floor(receiptAveragePrice),
+        Math.floor(drainQuantity),
+        Math.floor(drainReceiptPrice),
+        Math.floor(lastBalance),
+        Math.floor(allLeftBalanceReceiptPrice),
+        goods[i].id,
+      ])
+      goodMargins.push([
+        goods[i].name,
+        Math.floor(drainQuantity),
+        Math.floor(drainFinalPrice),
+        Math.floor(drainAveragePrice),
+        Math.floor(allProfit),
+        goods[i].id,
+      ])
+      goodReceipts.push([
+        goods[i].name,
+        Math.floor(receiptQuantity),
+        Math.floor(receiptFinalPrice),
+        Math.floor(drainQuantity),
+        Math.floor(drainFinalPrice),
+        Math.floor(allProfit),
+        Math.floor(lastBalance),
+        Math.floor(allLeftBalanceReceiptPrice),
+        goods[i].id,
+      ])
+    }
+
+  }
+
+  res.status(200).json({
+    success: true,
+    firstBalance: last,
+    receiptQuantity: receiptQuantity,
+    receiptAveragePrice: receiptAveragePrice,
+    receiptFinalPrice: receiptFinalPrice,
+    drainQuantity: drainQuantity,
+    drainAveragePrice: drainAveragePrice,
+    drainFinalPrice: drainFinalPrice,
+    oneProfit: oneProfit,
+    allProfit: allProfit,
+    lastBalance: lastBalance,
+    goodsProfits: goodProfits,
+    goodsLists: goodLists,
+    goodsMargins: goodMargins,
+    goodsReceipts: goodReceipts,
   });
 });
 

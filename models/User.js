@@ -17,6 +17,9 @@ const UserSchema = new mongoose.Schema({
   email: {
     type: String,
   },
+  invoiceId: {
+    type: String
+  },
   billNumber: {
     type: Number,
     default: 0
@@ -70,7 +73,7 @@ UserSchema.methods.checkPassword = async function (enteredPassword) {
 };
 
 UserSchema.methods.generatePasswordChangeToken = function () {
-  const resetToken = crypto.randomBytes(20).toString("hex");
+  const resetToken = crypto.randomBytes(3).toString("hex");
 
   this.resetPasswordToken = crypto
     .createHash("sha256")

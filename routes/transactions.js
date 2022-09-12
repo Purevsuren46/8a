@@ -9,7 +9,9 @@ const {
   getLoanTransactions,
   getGoodTransactions,
   getAllProfit,
-  getAllGoodProfit,
+  getAllByTimeProfit,
+  getAllCategoryProfit,
+  getAllCategoryByTimeProfit,
   getUserIsBasketTransactions,
   getBillTransactions,
   deleteTransaction,
@@ -43,10 +45,12 @@ router
 router
   .route("/profit")
   .get(protect, getAllProfit)
+  .post(protect, getAllByTimeProfit)
 
 router
   .route("/profit/:id")
-  .get(protect, getAllGoodProfit)
+  .get(protect, getAllCategoryProfit)
+  .post(protect, getAllCategoryByTimeProfit)
 
 router
   .route("/:id")

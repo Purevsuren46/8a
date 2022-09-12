@@ -1,9 +1,14 @@
 const User = require("../models/User");
+const Wallet = require("../models/Wallet");
 const MyError = require("../utils/myError");
 const asyncHandler = require("express-async-handler");
 const paginate = require("../utils/paginate");
 const sendEmail = require("../utils/email");
 const crypto = require("crypto");
+const Phone = require("../models/Phone");
+const axios = require("axios");
+
+
 
 // register
 exports.register = asyncHandler(async (req, res, next) => {
@@ -102,15 +107,57 @@ exports.getUser = asyncHandler(async (req, res, next) => {
   });
 });
 
-exports.createUser = asyncHandler(async (req, res, next) => {
-  const user = await User.create(req.body);
+exports.sendPhone = asyncHandler(async (req, res, next) => {
+  const cv = await User.findOne({phone: req.body.phone})
+  const phon = await Phone.findOne({phone: req.body.phone})
+
+  if (cv == null) {
+    const random = Math.floor(1000 + Math.random() * 9000);
+    const params = `from=72773055&to=${req.body.phone}&text=Таны бүртгэл үүсгэх нууц код ${random}`
+    const param = encodeURI(params)
+    await axios({
+      method: "get",
+      url: `https://api.messagepro.mn/send?key=63053350aa1c4d36e94d0756f4ec160e&${param}`
+    })
+  req.body.random = random
   
-  const token = user.getJsonWebToken();
-  res.status(200).json({
-    success: true,
-    data: user,
-    token,
-  });
+  } else {
+    throw new MyError("Утас бүртгүүлсэн байна", 400)
+  }
+
+  if (phon == null) {
+    const phone = await Phone.create(req.body)
+    res.status(200).json({
+      success: true,
+    });
+  } else {
+    phon.random = req.body.random
+    phon.save()
+    res.status(200).json({
+      success: true,
+    });
+  }
+  
+});
+
+exports.createUser = asyncHandler(async (req, res, next) => {
+  const random = await Phone.findOne({random: req.body.random})
+  if (random == null) {
+    throw new MyError("Мессежний код буруу байна", 400)
+  } else {
+    req.body.phone = random.phone
+    req.body.role = "user"
+    const posts = await User.create(req.body);
+    const rando = await Phone.deleteOne({random: req.body.random})
+
+const token = posts.getJsonWebToken();
+    res.status(200).json({
+      success: true,
+      data: posts,
+      token,
+    });
+    
+  }
 });
 
 exports.updateUser = asyncHandler(async (req, res, next) => {
@@ -145,36 +192,40 @@ exports.deleteUser = asyncHandler(async (req, res, next) => {
 });
 
 exports.forgotPassword = asyncHandler(async (req, res, next) => {
-  if (!req.body.email) {
-    throw new MyError("Та нууц үг сэргээх имэйл хаягаа дамжуулна уу", 400);
+  if (!req.body.phone) {
+    throw new MyError("Та нууц үг сэргээх утас дамжуулна уу", 400);
   }
 
-  const user = await User.findOne({ email: req.body.email });
+  const cv = await User.findOne({ phone: req.body.phone });
 
-  if (!user) {
-    throw new MyError(req.body.email + " имэйлтэй хэрэглэгч олдсонгүй!", 400);
+  if (!cv) {
+    throw new MyError(req.body.phone + " утастай хэрэглэгч олдсонгүй!", 400);
   }
 
-  const resetToken = user.generatePasswordChangeToken();
-  await user.save();
+  const resetToken = cv.generatePasswordChangeToken();
+  await cv.save();
 
-  // await user.save({ validateBeforeSave: false });
+  // await cv.save({ validateBeforeSave: false });
 
   // Имэйл илгээнэ
-  const link = `https://amazon.mn/changepassword/${resetToken}`;
+  const link = `${resetToken}`;
 
-  const message = `Сайн байна уу<br><br>Та нууц үгээ солих хүсэлт илгээлээ.<br> Нууц үгээ доорхи линк дээр дарж солино уу:<br><br><a target="_blank" href="${link}">${link}</a><br><br>Өдрийг сайхан өнгөрүүлээрэй!`;
+  const message = `Нууц үг өөрчлөх код: ${link}`;
+  const param = encodeURI(message)
 
-  const info = await sendEmail({
-    email: user.email,
-    subject: "Нууц үг өөрчлөх хүсэлт",
-    message,
-  });
+  // const info = await sendEmail({
+  //   email: cv.email,
+  //   subject: "Нууц үг өөрчлөх хүсэлт",
+  //   message,
+  // });
 
+    await axios({
+    method: "get",
+    url: `https://api.messagepro.mn/send?key=63053350aa1c4d36e94d0756f4ec160e&from=72773055&to=${req.body.phone}&text=${param}`
+  })
 
   res.status(200).json({
     success: true,
-    resetToken,
   });
 });
 
@@ -210,3 +261,153 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
     user: user,
   });
 });
+
+exports.changePhoneRequest = asyncHandler(async (req, res, next) => {
+
+  const cv = await User.findById(req.userId)
+  const cv1 = await User.findOne({phone: req.body.newPhone})
+  console.log(cv)
+  const phon = await Phone.findOne({phone: cv.phone})
+
+  if (cv1 == null) {
+    const random = Math.floor(1000 + Math.random() * 9000);
+    const params = `from=72773055&to=${req.body.newPhone}&text=Таны дугаар солих нууц код ${random}`
+    const param = encodeURI(params)
+    await axios({
+      method: "get",
+      url: `https://api.messagepro.mn/send?key=63053350aa1c4d36e94d0756f4ec160e&${param}`
+    })
+  req.body.random = random
+  
+  } else {
+    throw new MyError("Утас бүртгүүлсэн байна", 400)
+  }
+
+  if (phon == null) {
+    req.body.phone = cv.phone
+    const phone = await Phone.create(req.body)
+    res.status(200).json({
+      success: true,
+    });
+  } else {
+    phon.newPhone = req.body.newPhone
+    phon.random = req.body.random
+    phon.save()
+    res.status(200).json({
+      success: true,
+    });
+  }
+  
+});
+
+exports.changePhone = asyncHandler(async (req, res, next) => {
+
+  const random = await Phone.findOne({random: req.body.random})
+  if (random == null) {
+    throw new MyError("Мессежний код буруу байна", 400)
+  } else {
+  const cv = await User.findOne({phone: random.phone})
+    cv.phone = random.newPhone
+    cv.save()
+    const rando = await Phone.deleteOne({random: req.body.random})
+
+    
+    res.status(200).json({
+      success: true,
+      data: cv,
+    });
+  }
+
+});
+
+exports.invoiceTime = asyncHandler(async (req, res, next) => {
+  const profile = await User.findById(req.params.id);
+
+  await axios({
+    method: 'post',
+    url: 'https://merchant.qpay.mn/v2/auth/token',
+    headers: {
+      Authorization: `Basic SUhFTFA6NXNEdkVRazM=`
+    },
+
+  }).then(response => {
+    const token = response.data.access_token;
+
+    axios({
+      method: 'post',
+      url: 'https://merchant.qpay.mn/v2/invoice',
+      headers: {
+        Authorization: `Bearer ${token}`
+      },
+      data: {
+        invoice_code: "IHELP_INVOICE",
+        sender_invoice_no: "12345678",
+        invoice_receiver_code: `${profile.phone}`,
+        invoice_description:`8а charge ${profile.email}`,
+        
+        amount: req.body.amount,
+        callback_url:`http://159.223.82.71/api/v1/users/callbacks/${req.params.id}/${req.body.amount}`
+      }
+    }).then(async (response) => {
+      req.body.urls = response.data.urls
+      req.body.qrImage = response.data.qr_image
+      req.body.invoiceId = response.data.invoice_id
+      const wallet = await Wallet.create(req.body)
+      profile.invoiceId = wallet._id
+      profile.save()
+    })
+    .catch(error => {
+      console.log(error.response.data);
+    });
+  })
+  .catch(error => {
+    console.log(error.response.data);
+  });
+
+
+  res.status(200).json({
+    success: true,
+  });
+});
+
+exports.chargeTime = asyncHandler(async (req, res, next) => {
+  const profile = await User.findById(req.params.id);
+  // const wallet = await Wallet.findById(profile.invoiceId)
+  // const charge = req.query
+  // console.log(charge.qpay_payment_id)
+  // let messages = [];
+
+  // messages.push({
+  //     to: profile.expoPushToken,
+  //     sound: 'default',
+  //     body: `${(req.params.numId / 1000)} Хоногоор нэмэгдлээ`,
+  //     data: { data: "notification._id" },
+  //   })
+
+
+    if (profile.deadline < Date.now()) {
+      if (req.params.numId == 100) {
+        profile.deadline = Date.now() + 60 * 60 * 1000 * 24 * 30
+    } else if (req.params.numId == 150) {
+      profile.deadline = Date.now() + 60 * 60 * 1000 * 24 * 60
+    } else if (req.params.numId == 200) {
+      profile.deadline = Date.now() + 60 * 60 * 1000 * 24 * 90
+    } 
+    } else {
+      if (req.params.numId == 100) {
+        profile.deadline = profile.deadline.getTime() + 60 * 60 * 1000 * 24 * 30
+    } else if (req.params.numId == 150) {
+        profile.deadline = profile.deadline.getTime() + 60 * 60 * 1000 * 24 * 60
+    } else if (req.params.numId == 200) {
+        profile.deadline = profile.deadline.getTime() + 60 * 60 * 1000 * 24 * 90
+    } 
+    }
+
+    profile.save()
+
+  res.status(200).json({
+    success: true,
+    data: profile,
+  });
+});
+

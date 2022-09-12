@@ -15,6 +15,7 @@ const usersRoutes = require("./routes/users");
 const templatesRoutes = require("./routes/templates");
 const billsRoutes = require("./routes/bills");
 const transactionsRoutes = require("./routes/transactions");
+const walletsRoutes = require("./routes/wallets");
 const cors = require("cors");
 var cookieParser = require("cookie-parser");
 
@@ -80,6 +81,7 @@ app.use("/api/v1/users", usersRoutes);
 app.use("/api/v1/bills", billsRoutes);
 app.use("/api/v1/templates", templatesRoutes);
 app.use("/api/v1/transactions", transactionsRoutes);
+app.use("/api/v1/wallets", walletsRoutes);
 app.use(errorHandler);
 
 
