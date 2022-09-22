@@ -234,10 +234,7 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
     throw new MyError("Та токен болон нууц үгээ дамжуулна уу", 400);
   }
 
-  const encrypted = crypto
-    .createHash("sha256")
-    .update(req.body.resetToken)
-    .digest("hex");
+  const encrypted = req.body.resetToken
 
   const user = await User.findOne({
     resetPasswordToken: encrypted,
