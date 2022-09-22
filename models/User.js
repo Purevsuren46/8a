@@ -73,12 +73,10 @@ UserSchema.methods.checkPassword = async function (enteredPassword) {
 };
 
 UserSchema.methods.generatePasswordChangeToken = function () {
-  const resetToken = crypto.randomBytes(3).toString("hex");
+  const resetToken = Math.floor(1000 + Math.random() * 9000);
 
-  this.resetPasswordToken = crypto
-    .createHash("sha256")
-    .update(resetToken)
-    .digest("hex");
+
+  this.resetPasswordToken = resetToken
 
   this.resetPasswordExpire = Date.now() + 10 * 60 * 1000;
 
