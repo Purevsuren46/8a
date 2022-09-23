@@ -95,7 +95,8 @@ exports.getUsers = asyncHandler(async (req, res, next) => {
 });
 
 exports.getUser = asyncHandler(async (req, res, next) => {
-  const user = await User.findById(req.params.id);
+  const select = req.query.select;
+  const user = await User.findById(req.params.id, select);
 
   if (!user) {
     throw new MyError(req.params.id + " ID-тэй хэрэглэгч байхгүй!", 400);
