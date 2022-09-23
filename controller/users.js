@@ -100,11 +100,21 @@ exports.getUser = asyncHandler(async (req, res, next) => {
   if (!user) {
     throw new MyError(req.params.id + " ID-тэй хэрэглэгч байхгүй!", 400);
   }
+  if (user.deadline < Date.now()) {
+    res.status(200).json({
+      success: true,
+      data: user,
+      time: false
+    });
+  } else {
+    res.status(200).json({
+      success: true,
+      data: user,
+      time: true
+    });
+  }
 
-  res.status(200).json({
-    success: true,
-    data: user,
-  });
+
 });
 
 exports.sendPhone = asyncHandler(async (req, res, next) => {
