@@ -35,6 +35,9 @@ const UserSchema = new mongoose.Schema({
     required: [true, "Нууц үгээ оруулна уу"],
     select: false,
   },
+  forgotPasswordPhoneDate: {
+    type: Date,
+  },
   resetPasswordToken: String,
   resetPasswordExpire: Date,
   createdAt: {

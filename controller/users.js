@@ -211,32 +211,56 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
   if (!cv) {
     throw new MyError(req.body.phone + " утастай хэрэглэгч олдсонгүй!", 400);
   }
+  if (cv.forgotPasswordPhoneDate == undefined) {
+    const resetToken = cv.generatePasswordChangeToken();
+    await cv.save();
+  
 
-  const resetToken = cv.generatePasswordChangeToken();
-  await cv.save();
+    const link = `${resetToken}`;
+  
+    const message = `Нууц үг өөрчлөх код: ${link}`;
+    const param = encodeURI(message)
+  
 
-  // await cv.save({ validateBeforeSave: false });
+      await axios({
+      method: "get",
+      url: `https://api.messagepro.mn/send?key=63053350aa1c4d36e94d0756f4ec160e&from=72773055&to=${req.body.phone}&text=${param}`
+    })
+  
+    cv.forgotPasswordPhoneDate = Date.now()
+    cv.save()
+  
+    res.status(200).json({
+      success: true,
+    });
+  } else {
+    if (cv.forgotPasswordPhoneDate.getTime()  + 60 * 1000 > Date.now()) {
+      throw new MyError("1 минутын дараа нууц үг солих мсж илгээх боломжтой", 400);
+    }
+  
+    const resetToken = cv.generatePasswordChangeToken();
+    await cv.save();
+  
 
-  // Имэйл илгээнэ
-  const link = `${resetToken}`;
+    const link = `${resetToken}`;
+  
+    const message = `Нууц үг өөрчлөх код: ${link}`;
+    const param = encodeURI(message)
+  
 
-  const message = `Нууц үг өөрчлөх код: ${link}`;
-  const param = encodeURI(message)
+      await axios({
+      method: "get",
+      url: `https://api.messagepro.mn/send?key=63053350aa1c4d36e94d0756f4ec160e&from=72773055&to=${req.body.phone}&text=${param}`
+    })
+  
+    cv.forgotPasswordPhoneDate = Date.now()
+    cv.save()
+  
+    res.status(200).json({
+      success: true,
+    });
+  }
 
-  // const info = await sendEmail({
-  //   email: cv.email,
-  //   subject: "Нууц үг өөрчлөх хүсэлт",
-  //   message,
-  // });
-
-    await axios({
-    method: "get",
-    url: `https://api.messagepro.mn/send?key=63053350aa1c4d36e94d0756f4ec160e&from=72773055&to=${req.body.phone}&text=${param}`
-  })
-
-  res.status(200).json({
-    success: true,
-  });
 });
 
 exports.resetPassword = asyncHandler(async (req, res, next) => {
