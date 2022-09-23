@@ -353,7 +353,7 @@ exports.changePhone = asyncHandler(async (req, res, next) => {
 
 exports.invoiceTime = asyncHandler(async (req, res, next) => {
   const profile = await User.findById(req.params.id);
-
+  const a = 0
   await axios({
     method: 'post',
     url: 'https://merchant.qpay.mn/v2/auth/token',
@@ -385,6 +385,7 @@ exports.invoiceTime = asyncHandler(async (req, res, next) => {
       req.body.invoiceId = response.data.invoice_id
       const wallet = await Wallet.create(req.body)
       profile.invoiceId = wallet._id
+      a = wallet._id
       profile.save()
     })
     .catch(error => {
@@ -398,7 +399,7 @@ exports.invoiceTime = asyncHandler(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    data: wallet._id,
+    data: a,
   });
 });
 
