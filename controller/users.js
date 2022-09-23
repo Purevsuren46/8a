@@ -398,7 +398,7 @@ exports.invoiceTime = asyncHandler(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    data: profile.invoiceId,
+    data: wallet._id,
   });
 });
 
