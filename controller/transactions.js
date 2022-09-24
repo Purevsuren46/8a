@@ -334,6 +334,7 @@ exports.getAllByTimeProfit = asyncHandler(async (req, res, next) => {
   let goodMargins = []
   let goodReceipts = []
   let transactionReport = []
+  let salesForecastReport = []
   for (let i = 0; i < goods.length; i++) {
     req.query.sort = "createdAt"
     const sort = req.query.sort;
@@ -402,6 +403,16 @@ exports.getAllByTimeProfit = asyncHandler(async (req, res, next) => {
       ])
       transactionReport.push([
         goods[i].name,
+        0,
+        0,
+        0,
+        0,
+        goods[i].id,
+      ])
+      salesForecastReport.push([
+        goods[i].name,
+        0,
+        0,
         0,
         0,
         0,
@@ -491,6 +502,16 @@ exports.getAllByTimeProfit = asyncHandler(async (req, res, next) => {
         Math.floor(drainFinalPrice),
         goods[i].id,
       ])
+      salesForecastReport.push([
+        goods[i].name,
+        Math.floor(lastBalance),
+        Math.floor(drainAveragePrice),
+        Math.floor(lastBalance * drainAveragePrice),
+        Math.floor(drainAveragePrice),
+        Math.floor(drainAveragePrice * lastBalance),
+        Math.floor((drainAveragePrice * lastBalance) - (lastBalance * drainAveragePrice)),
+        goods[i].id,
+      ])
     }
 
   }
@@ -512,6 +533,7 @@ exports.getAllByTimeProfit = asyncHandler(async (req, res, next) => {
     goodsMargins: goodMargins,
     goodsReceipts: goodReceipts,
     transactionReport: transactionReport,
+    salesForecastReport: salesForecastReport,
   });
 });
 
