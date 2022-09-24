@@ -25,6 +25,10 @@ exports.getBills = asyncHandler(async (req, res, next) => {
       path: "transaction",
       select: "name averagePrice",
     })
+    .populate({
+      path: "createUser",
+      select: "firstName",
+    })
     .sort(sort)
     .skip(pagination.start - 1)
     .limit(limit);
@@ -59,6 +63,7 @@ exports.getUserDebts = asyncHandler(async (req, res, next) => {
       path: "transaction",
       select: "name averagePrice",
     })
+    
     .sort(sort)
     .skip(pagination.start - 1)
     .limit(limit);
