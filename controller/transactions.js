@@ -386,6 +386,7 @@ exports.getAllByTimeProfit = asyncHandler(async (req, res, next) => {
         0,
         0,
         0,
+        0,
         goods[i].id,
       ])
       goodReceipts.push([
@@ -464,9 +465,10 @@ exports.getAllByTimeProfit = asyncHandler(async (req, res, next) => {
       ])
       goodMargins.push([
         goods[i].name,
+        Math.floor(receiptAveragePrice),
         Math.floor(drainQuantity),
-        Math.floor(drainFinalPrice),
         Math.floor(drainAveragePrice),
+        Math.floor(drainFinalPrice),
         Math.floor(allProfit),
         goods[i].id,
       ])
