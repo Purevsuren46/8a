@@ -534,6 +534,8 @@ exports.getAllByTimeProfit = asyncHandler(async (req, res, next) => {
     goodsReceipts: goodReceipts,
     transactionReport: transactionReport,
     salesForecastReport: salesForecastReport,
+    date1: req.body.date1,
+    date2: req.body.date2,
   });
 });
 
