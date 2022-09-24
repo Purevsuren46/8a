@@ -10,7 +10,7 @@ const BillSchema = new mongoose.Schema(
     }],
     incomeType: {
       type: String,
-      enum: ["Бэлэн", "Зээл"]
+      enum: ["Бэлэн", "Зээл", "Бэлэн бус"]
     },
     loanName: {
       type: String,
