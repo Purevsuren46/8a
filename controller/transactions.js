@@ -505,11 +505,11 @@ exports.getAllByTimeProfit = asyncHandler(async (req, res, next) => {
       salesForecastReport.push([
         goods[i].name,
         Math.floor(lastBalance),
-        Math.floor(drainAveragePrice),
-        Math.floor(lastBalance * drainAveragePrice),
+        Math.floor(receiptAveragePrice),
+        Math.floor(lastBalance * receiptAveragePrice),
         Math.floor(drainAveragePrice),
         Math.floor(drainAveragePrice * lastBalance),
-        Math.floor((drainAveragePrice * lastBalance) - (lastBalance * drainAveragePrice)),
+        Math.floor((drainAveragePrice * lastBalance) - (lastBalance * receiptAveragePrice)),
         goods[i].id,
       ])
     }
@@ -987,11 +987,11 @@ exports.getAllCategoryByTimeProfit = asyncHandler(async (req, res, next) => {
       salesForecastReport.push([
         goods[i].name,
         Math.floor(lastBalance),
-        Math.floor(drainAveragePrice),
-        Math.floor(lastBalance * drainAveragePrice),
+        Math.floor(receiptAveragePrice),
+        Math.floor(lastBalance * receiptAveragePrice),
         Math.floor(drainAveragePrice),
         Math.floor(drainAveragePrice * lastBalance),
-        Math.floor((drainAveragePrice * lastBalance) - (lastBalance * drainAveragePrice)),
+        Math.floor((drainAveragePrice * lastBalance) - (lastBalance * receiptAveragePrice)),
         goods[i].id,
       ])
     }
