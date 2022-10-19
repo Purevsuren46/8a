@@ -11,6 +11,8 @@ const fileupload = require("express-fileupload");
 // Router оруулж ирэх
 const categoriesRoutes = require("./routes/categories");
 const goodsRoutes = require("./routes/goods");
+const countsRoutes = require("./routes/counts");
+const countNamesRoutes = require("./routes/countNames");
 const usersRoutes = require("./routes/users");
 const templatesRoutes = require("./routes/templates");
 const billsRoutes = require("./routes/bills");
@@ -77,6 +79,8 @@ app.use(fileupload());
 app.use(morgan("combined", { stream: accessLogStream }));
 app.use("/api/v1/categories", categoriesRoutes);
 app.use("/api/v1/goods", goodsRoutes);
+app.use("/api/v1/counts", countsRoutes);
+app.use("/api/v1/countNames", countNamesRoutes);
 app.use("/api/v1/users", usersRoutes);
 app.use("/api/v1/bills", billsRoutes);
 app.use("/api/v1/templates", templatesRoutes);
