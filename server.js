@@ -41,7 +41,7 @@ var accessLogStream = rfs.createStream("access.log", {
   path: path.join(__dirname, "log"),
 });
 
-var whitelist = ["http://localhost:3000"];
+var whitelist = ["http://localhost:3000","http://naimaaadmin.com", "http://www.naimaaadmin.com", "https://naimaaadmin.com", "https://www.naimaaadmin.com"  ];
 
 var corsOptions = {
   origin: function (origin, callback) {
