@@ -376,7 +376,7 @@ exports.invoiceTime = asyncHandler(async (req, res, next) => {
         invoice_description:`8а charge ${profile.email}`,
         
         amount: req.body.amount,
-        callback_url:`http://128.199.94.192/api/v1/users/callbacks/${req.params.id}/${req.body.amount}`
+        callback_url:`https://naimaaserver.com/api/v1/users/callbacks/${req.params.id}/${req.body.amount}`
       }
     }).then(async (response) => {
       req.body.urls = response.data.urls
