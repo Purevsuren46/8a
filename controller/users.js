@@ -123,7 +123,7 @@ exports.sendPhone = asyncHandler(async (req, res, next) => {
 
   if (cv == null) {
     const random = Math.floor(1000 + Math.random() * 9000);
-    const params = `from=72773055&to=${req.body.phone}&text=Таны бүртгэл үүсгэх нууц код ${random}`
+    const params = `from=72773055&to=${req.body.phone}&text=Таны бүртгэл үүсгэх нууц код ${random} Наймаа ХХК`
     const param = encodeURI(params)
     await axios({
       method: "get",
@@ -218,7 +218,7 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
 
     const link = `${resetToken}`;
   
-    const message = `Нууц үг өөрчлөх код: ${link}`;
+    const message = `Нууц үг өөрчлөх код: ${link} Наймаа ХХК`;
     const param = encodeURI(message)
   
 
@@ -244,7 +244,7 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
 
     const link = `${resetToken}`;
   
-    const message = `Нууц үг өөрчлөх код: ${link}`;
+    const message = `Нууц үг өөрчлөх код: ${link} Наймаа ХХК`;
     const param = encodeURI(message)
   
 
@@ -302,7 +302,7 @@ exports.changePhoneRequest = asyncHandler(async (req, res, next) => {
 
   if (cv1 == null) {
     const random = Math.floor(1000 + Math.random() * 9000);
-    const params = `from=72773055&to=${req.body.newPhone}&text=Таны дугаар солих нууц код ${random}`
+    const params = `from=72773055&to=${req.body.newPhone}&text=Таны дугаар солих нууц код ${random} Наймаа ХХК`
     const param = encodeURI(params)
     await axios({
       method: "get",
