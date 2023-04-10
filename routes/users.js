@@ -17,6 +17,7 @@ const {
   invoiceTime,
   chargeTime,
   logout,
+  authMeUser,
 } = require("../controller/users");
 
 const { getUserGoods } = require("../controller/goods");
