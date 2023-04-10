@@ -33,25 +33,16 @@ router.route("/send").post(sendPhone);
 router.route("/invoice/:id").post(invoiceTime);
 router.route("/callbacks/:id/:numId").get(chargeTime);
 
-router
-  .route("/")
-  .get(protect, getUsers)
-  .post( createUser);
+router.route("/").get(protect, getUsers).post(createUser);
 router.use(protect);
 router.route("/req").post(protect, changePhoneRequest);
 router.route("/change").post(changePhone);
 //"/api/v1/users"
 
+router.route("/me").get(protect, authMeUser);
 
-router
-  .route("/:id")
-  .get(getUser)
-  .put( updateUser)
-  .delete( deleteUser);
+router.route("/:id").get(getUser).put(updateUser).delete(deleteUser);
 
-router
-  .route("/:id/goods")
-  .get( getUserGoods);
-
+router.route("/:id/goods").get(getUserGoods);
 
 module.exports = router;

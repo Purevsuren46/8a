@@ -8,7 +8,16 @@ const crypto = require("crypto");
 const Phone = require("../models/Phone");
 const axios = require("axios");
 
-
+exports.authMeUser = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.userId);
+  if (!user) {
+    throw new MyError(req.params.id, 401);
+  }
+  res.status(200).json({
+    success: true,
+    data: user,
+  });
+});
 
 // register
 exports.register = asyncHandler(async (req, res, next) => {
@@ -104,69 +113,64 @@ exports.getUser = asyncHandler(async (req, res, next) => {
     res.status(200).json({
       success: true,
       data: user,
-      time: false
+      time: false,
     });
   } else {
     res.status(200).json({
       success: true,
       data: user,
-      time: true
+      time: true,
     });
   }
-
-
 });
 
 exports.sendPhone = asyncHandler(async (req, res, next) => {
-  const cv = await User.findOne({phone: req.body.phone})
-  const phon = await Phone.findOne({phone: req.body.phone})
+  const cv = await User.findOne({ phone: req.body.phone });
+  const phon = await Phone.findOne({ phone: req.body.phone });
 
   if (cv == null) {
     const random = Math.floor(1000 + Math.random() * 9000);
-    const params = `from=72773055&to=${req.body.phone}&text=Таны бүртгэл үүсгэх нууц код ${random} Наймаа ХХК`
-    const param = encodeURI(params)
+    const params = `from=72773055&to=${req.body.phone}&text=Таны бүртгэл үүсгэх нууц код ${random} Наймаа ХХК`;
+    const param = encodeURI(params);
     await axios({
       method: "get",
-      url: `https://api.messagepro.mn/send?key=63053350aa1c4d36e94d0756f4ec160e&${param}`
-    })
-  req.body.random = random
-  
+      url: `https://api.messagepro.mn/send?key=63053350aa1c4d36e94d0756f4ec160e&${param}`,
+    });
+    req.body.random = random;
   } else {
-    throw new MyError("Утас бүртгүүлсэн байна", 400)
+    throw new MyError("Утас бүртгүүлсэн байна", 400);
   }
 
   if (phon == null) {
-    const phone = await Phone.create(req.body)
+    const phone = await Phone.create(req.body);
     res.status(200).json({
       success: true,
     });
   } else {
-    phon.random = req.body.random
-    phon.save()
+    phon.random = req.body.random;
+    phon.save();
     res.status(200).json({
       success: true,
     });
   }
-  
 });
 
 exports.createUser = asyncHandler(async (req, res, next) => {
-  const random = await Phone.findOne({random: req.body.random})
+  const random = await Phone.findOne({ random: req.body.random });
   if (random == null) {
-    throw new MyError("Мессежний код буруу байна", 400)
+    throw new MyError("Мессежний код буруу байна", 400);
   } else {
-    req.body.phone = random.phone
-    req.body.role = "user"
+    req.body.phone = random.phone;
+    req.body.role = "user";
     const posts = await User.create(req.body);
-    const rando = await Phone.deleteOne({random: req.body.random})
+    const rando = await Phone.deleteOne({ random: req.body.random });
 
-const token = posts.getJsonWebToken();
+    const token = posts.getJsonWebToken();
     res.status(200).json({
       success: true,
       data: posts,
       token,
     });
-    
   }
 });
 
@@ -214,53 +218,51 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
   if (cv.forgotPasswordPhoneDate == undefined) {
     const resetToken = cv.generatePasswordChangeToken();
     await cv.save();
-  
 
     const link = `${resetToken}`;
-  
-    const message = `Нууц үг өөрчлөх код: ${link} Наймаа ХХК`;
-    const param = encodeURI(message)
-  
 
-      await axios({
+    const message = `Нууц үг өөрчлөх код: ${link} Наймаа ХХК`;
+    const param = encodeURI(message);
+
+    await axios({
       method: "get",
-      url: `https://api.messagepro.mn/send?key=63053350aa1c4d36e94d0756f4ec160e&from=72773055&to=${req.body.phone}&text=${param}`
-    })
-  
-    cv.forgotPasswordPhoneDate = Date.now()
-    cv.save()
-  
+      url: `https://api.messagepro.mn/send?key=63053350aa1c4d36e94d0756f4ec160e&from=72773055&to=${req.body.phone}&text=${param}`,
+    });
+
+    cv.forgotPasswordPhoneDate = Date.now();
+    cv.save();
+
     res.status(200).json({
       success: true,
     });
   } else {
-    if (cv.forgotPasswordPhoneDate.getTime()  + 60 * 1000 > Date.now()) {
-      throw new MyError("1 минутын дараа нууц үг солих мсж илгээх боломжтой", 400);
+    if (cv.forgotPasswordPhoneDate.getTime() + 60 * 1000 > Date.now()) {
+      throw new MyError(
+        "1 минутын дараа нууц үг солих мсж илгээх боломжтой",
+        400
+      );
     }
-  
+
     const resetToken = cv.generatePasswordChangeToken();
     await cv.save();
-  
 
     const link = `${resetToken}`;
-  
-    const message = `Нууц үг өөрчлөх код: ${link} Наймаа ХХК`;
-    const param = encodeURI(message)
-  
 
-      await axios({
+    const message = `Нууц үг өөрчлөх код: ${link} Наймаа ХХК`;
+    const param = encodeURI(message);
+
+    await axios({
       method: "get",
-      url: `https://api.messagepro.mn/send?key=63053350aa1c4d36e94d0756f4ec160e&from=72773055&to=${req.body.phone}&text=${param}`
-    })
-  
-    cv.forgotPasswordPhoneDate = Date.now()
-    cv.save()
-  
+      url: `https://api.messagepro.mn/send?key=63053350aa1c4d36e94d0756f4ec160e&from=72773055&to=${req.body.phone}&text=${param}`,
+    });
+
+    cv.forgotPasswordPhoneDate = Date.now();
+    cv.save();
+
     res.status(200).json({
       success: true,
     });
   }
-
 });
 
 exports.resetPassword = asyncHandler(async (req, res, next) => {
@@ -268,7 +270,7 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
     throw new MyError("Та токен болон нууц үгээ дамжуулна уу", 400);
   }
 
-  const encrypted = req.body.resetToken
+  const encrypted = req.body.resetToken;
 
   const user = await User.findOne({
     resetPasswordToken: encrypted,
@@ -294,112 +296,104 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
 });
 
 exports.changePhoneRequest = asyncHandler(async (req, res, next) => {
-
-  const cv = await User.findById(req.userId)
-  const cv1 = await User.findOne({phone: req.body.newPhone})
-  console.log(cv)
-  const phon = await Phone.findOne({phone: cv.phone})
+  const cv = await User.findById(req.userId);
+  const cv1 = await User.findOne({ phone: req.body.newPhone });
+  console.log(cv);
+  const phon = await Phone.findOne({ phone: cv.phone });
 
   if (cv1 == null) {
     const random = Math.floor(1000 + Math.random() * 9000);
-    const params = `from=72773055&to=${req.body.newPhone}&text=Таны дугаар солих нууц код ${random} Наймаа ХХК`
-    const param = encodeURI(params)
+    const params = `from=72773055&to=${req.body.newPhone}&text=Таны дугаар солих нууц код ${random} Наймаа ХХК`;
+    const param = encodeURI(params);
     await axios({
       method: "get",
-      url: `https://api.messagepro.mn/send?key=63053350aa1c4d36e94d0756f4ec160e&${param}`
-    })
-  req.body.random = random
-  
+      url: `https://api.messagepro.mn/send?key=63053350aa1c4d36e94d0756f4ec160e&${param}`,
+    });
+    req.body.random = random;
   } else {
-    throw new MyError("Утас бүртгүүлсэн байна", 400)
+    throw new MyError("Утас бүртгүүлсэн байна", 400);
   }
 
   if (phon == null) {
-    req.body.phone = cv.phone
-    const phone = await Phone.create(req.body)
+    req.body.phone = cv.phone;
+    const phone = await Phone.create(req.body);
     res.status(200).json({
       success: true,
     });
   } else {
-    phon.newPhone = req.body.newPhone
-    phon.random = req.body.random
-    phon.save()
+    phon.newPhone = req.body.newPhone;
+    phon.random = req.body.random;
+    phon.save();
     res.status(200).json({
       success: true,
     });
   }
-  
 });
 
 exports.changePhone = asyncHandler(async (req, res, next) => {
-
-  const random = await Phone.findOne({random: req.body.random})
+  const random = await Phone.findOne({ random: req.body.random });
   if (random == null) {
-    throw new MyError("Мессежний код буруу байна", 400)
+    throw new MyError("Мессежний код буруу байна", 400);
   } else {
-  const cv = await User.findOne({phone: random.phone})
-    cv.phone = random.newPhone
-    cv.save()
-    const rando = await Phone.deleteOne({random: req.body.random})
+    const cv = await User.findOne({ phone: random.phone });
+    cv.phone = random.newPhone;
+    cv.save();
+    const rando = await Phone.deleteOne({ random: req.body.random });
 
-    
     res.status(200).json({
       success: true,
       data: cv,
     });
   }
-
 });
 
 exports.invoiceTime = asyncHandler(async (req, res, next) => {
   const profile = await User.findById(req.params.id);
   await axios({
-    method: 'post',
-    url: 'https://merchant.qpay.mn/v2/auth/token',
+    method: "post",
+    url: "https://merchant.qpay.mn/v2/auth/token",
     headers: {
-      Authorization: `Basic SUhFTFA6NXNEdkVRazM=`
+      Authorization: `Basic SUhFTFA6NXNEdkVRazM=`,
     },
+  })
+    .then((response) => {
+      const token = response.data.access_token;
 
-  }).then(response => {
-    const token = response.data.access_token;
+      axios({
+        method: "post",
+        url: "https://merchant.qpay.mn/v2/invoice",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        data: {
+          invoice_code: "IHELP_INVOICE",
+          sender_invoice_no: "12345678",
+          invoice_receiver_code: `${profile.phone}`,
+          invoice_description: `8а charge ${profile.email}`,
 
-    axios({
-      method: 'post',
-      url: 'https://merchant.qpay.mn/v2/invoice',
-      headers: {
-        Authorization: `Bearer ${token}`
-      },
-      data: {
-        invoice_code: "IHELP_INVOICE",
-        sender_invoice_no: "12345678",
-        invoice_receiver_code: `${profile.phone}`,
-        invoice_description:`8а charge ${profile.email}`,
-        
-        amount: req.body.amount,
-        callback_url:`https://naimaaserver.com/api/v1/users/callbacks/${req.params.id}/${req.body.amount}`
-      }
-    }).then(async (response) => {
-      req.body.urls = response.data.urls
-      req.body.qrImage = response.data.qr_image
-      req.body.invoiceId = response.data.invoice_id
-      const wallet = await Wallet.create(req.body)
-      profile.invoiceId = wallet._id
-      profile.save()
-      res.status(200).json({
-        success: true,
-        data: wallet._id,
-      });
+          amount: req.body.amount,
+          callback_url: `https://naimaaserver.com/api/v1/users/callbacks/${req.params.id}/${req.body.amount}`,
+        },
+      })
+        .then(async (response) => {
+          req.body.urls = response.data.urls;
+          req.body.qrImage = response.data.qr_image;
+          req.body.invoiceId = response.data.invoice_id;
+          const wallet = await Wallet.create(req.body);
+          profile.invoiceId = wallet._id;
+          profile.save();
+          res.status(200).json({
+            success: true,
+            data: wallet._id,
+          });
+        })
+        .catch((error) => {
+          console.log(error.response.data);
+        });
     })
-    .catch(error => {
+    .catch((error) => {
       console.log(error.response.data);
     });
-  })
-  .catch(error => {
-    console.log(error.response.data);
-  });
-
-
-
 });
 
 exports.chargeTime = asyncHandler(async (req, res, next) => {
@@ -416,30 +410,28 @@ exports.chargeTime = asyncHandler(async (req, res, next) => {
   //     data: { data: "notification._id" },
   //   })
 
-
-    if (profile.deadline < Date.now()) {
-      if (req.params.numId == 100) {
-        profile.deadline = Date.now() + 60 * 60 * 1000 * 24 * 30
+  if (profile.deadline < Date.now()) {
+    if (req.params.numId == 100) {
+      profile.deadline = Date.now() + 60 * 60 * 1000 * 24 * 30;
     } else if (req.params.numId == 150) {
-      profile.deadline = Date.now() + 60 * 60 * 1000 * 24 * 60
+      profile.deadline = Date.now() + 60 * 60 * 1000 * 24 * 60;
     } else if (req.params.numId == 200) {
-      profile.deadline = Date.now() + 60 * 60 * 1000 * 24 * 90
-    } 
-    } else {
-      if (req.params.numId == 100) {
-        profile.deadline = profile.deadline.getTime() + 60 * 60 * 1000 * 24 * 30
-    } else if (req.params.numId == 150) {
-        profile.deadline = profile.deadline.getTime() + 60 * 60 * 1000 * 24 * 60
-    } else if (req.params.numId == 200) {
-        profile.deadline = profile.deadline.getTime() + 60 * 60 * 1000 * 24 * 90
-    } 
+      profile.deadline = Date.now() + 60 * 60 * 1000 * 24 * 90;
     }
+  } else {
+    if (req.params.numId == 100) {
+      profile.deadline = profile.deadline.getTime() + 60 * 60 * 1000 * 24 * 30;
+    } else if (req.params.numId == 150) {
+      profile.deadline = profile.deadline.getTime() + 60 * 60 * 1000 * 24 * 60;
+    } else if (req.params.numId == 200) {
+      profile.deadline = profile.deadline.getTime() + 60 * 60 * 1000 * 24 * 90;
+    }
+  }
 
-    profile.save()
+  profile.save();
 
   res.status(200).json({
     success: true,
     data: profile,
   });
 });
-
