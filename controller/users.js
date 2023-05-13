@@ -127,15 +127,10 @@ exports.getUser = asyncHandler(async (req, res, next) => {
 exports.sendPhone = asyncHandler(async (req, res, next) => {
   const cv = await User.findOne({ phone: req.body.phone });
   const phon = await Phone.findOne({ phone: req.body.phone });
-  console.log(cv);
-  console.log(phon);
   if (cv == null) {
     const random = Math.floor(1000 + Math.random() * 9000);
-    console.log(random);
     const params = `from=72773055&to=${req.body.phone}&text=Таны бүртгэл үүсгэх нууц код ${random} Наймаа ХХК`;
-    console.log(params);
     const param = encodeURI(params);
-    console.log(param);
     await axios({
       method: "get",
       url: `https://api.messagepro.mn/send?key=63053350aa1c4d36e94d0756f4ec160e&${param}`,
@@ -160,22 +155,22 @@ exports.sendPhone = asyncHandler(async (req, res, next) => {
 });
 
 exports.createUser = asyncHandler(async (req, res, next) => {
-  const random = await Phone.findOne({ random: req.body.random });
-  if (random == null) {
-    throw new MyError("Мессежний код буруу байна", 400);
-  } else {
-    req.body.phone = random.phone;
-    req.body.role = "user";
-    const posts = await User.create(req.body);
-    const rando = await Phone.deleteOne({ random: req.body.random });
+  // const random = await Phone.findOne({ random: req.body.random });
+  // if (random == null) {
+  //   throw new MyError("Мессежний код буруу байна", 400);
+  // } else {
+  // req.body.phone = random.phone;
+  req.body.role = "user";
+  const posts = await User.create(req.body);
+  // const rando = await Phone.deleteOne({ random: req.body.random });
 
-    const token = posts.getJsonWebToken();
-    res.status(200).json({
-      success: true,
-      data: posts,
-      token,
-    });
-  }
+  const token = posts.getJsonWebToken();
+  res.status(200).json({
+    success: true,
+    data: posts,
+    token,
+  });
+  // }
 });
 
 exports.updateUser = asyncHandler(async (req, res, next) => {
@@ -376,7 +371,7 @@ exports.invoiceTime = asyncHandler(async (req, res, next) => {
           invoice_description: `8а charge ${profile.email}`,
 
           amount: req.body.amount,
-          callback_url: `https://naimaaserver.com/api/v1/users/callbacks/${req.params.id}/${req.body.amount}`,
+          callback_url: `https://naimaaadmin.com/api/v1/users/callbacks/${req.params.id}/${req.body.amount}`,
         },
       })
         .then(async (response) => {
