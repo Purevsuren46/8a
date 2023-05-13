@@ -127,11 +127,15 @@ exports.getUser = asyncHandler(async (req, res, next) => {
 exports.sendPhone = asyncHandler(async (req, res, next) => {
   const cv = await User.findOne({ phone: req.body.phone });
   const phon = await Phone.findOne({ phone: req.body.phone });
-
+  console.log(cv);
+  console.log(phon);
   if (cv == null) {
     const random = Math.floor(1000 + Math.random() * 9000);
+    console.log(random);
     const params = `from=72773055&to=${req.body.phone}&text=Таны бүртгэл үүсгэх нууц код ${random} Наймаа ХХК`;
+    console.log(params);
     const param = encodeURI(params);
+    console.log(param);
     await axios({
       method: "get",
       url: `https://api.messagepro.mn/send?key=63053350aa1c4d36e94d0756f4ec160e&${param}`,
