@@ -20,12 +20,12 @@ exports.getGoods = asyncHandler(async (req, res, next) => {
   const pagination = await paginate(page, limit, Good);
 
   const goods = await Good.find(req.query, select)
-    .populate({path: "category", select: "name"})
+    .populate({ path: "category", select: "name" })
     .sort(sort)
     .skip(pagination.start - 1)
     .limit(limit);
 
-  const goodsList = []
+  const goodsList = [];
   for (let i = 0; i < goods.length; i++) {
     goodsList.push([
       goods[i].name,
@@ -33,7 +33,7 @@ exports.getGoods = asyncHandler(async (req, res, next) => {
       goods[i].drain,
       goods[i].quantity,
       goods[i].id,
-    ])
+    ]);
   }
 
   res.status(200).json({
@@ -79,7 +79,10 @@ exports.getCategoryGoods = asyncHandler(async (req, res, next) => {
 });
 
 exports.getGood = asyncHandler(async (req, res, next) => {
-  const good = await Good.findById(req.params.id).populate({path: "category", select: "name"});
+  const good = await Good.findById(req.params.id).populate({
+    path: "category",
+    select: "name",
+  });
 
   if (!good) {
     throw new MyError(req.params.id + " ID-тэй ном байхгүй байна.", 404);
@@ -127,7 +130,7 @@ exports.deleteGood = asyncHandler(async (req, res, next) => {
   // if (good.createUser.toString() !== req.userId && req.userRole !== "admin") {
   //   throw new MyError("Та зөвхөн өөрийнхөө номыг л засварлах эрхтэй", 403);
   // }
-  const transactions = await Transaction.findAndDelete
+  const transactions = await Transaction.findAndDelete;
 
   const user = await User.findById(req.userId);
 
@@ -149,11 +152,6 @@ exports.updateGood = asyncHandler(async (req, res, next) => {
   if (!good) {
     throw new MyError(req.params.id + " ID-тэй ном байхгүйээээ.", 400);
   }
-
-
-
-
-
 
   good.save();
 
@@ -179,16 +177,21 @@ exports.uploadGoodPhoto = asyncHandler(async (req, res, next) => {
     throw new MyError("Та зураг upload хийнэ үү.", 400);
   }
 
+  if (file.size > process.env.MAX_UPLOAD_FILE_SIZE) {
+    throw new MyError("Зурагны хэмжээ хэтэрсэн байна", 400);
+  }
 
   file.name = `photo_${req.params.id}${path.parse(file.name).ext}`;
 
-  const picture = await sharp(file.data).resize({width: parseInt(process.env.FILE_SIZE)}).toFile(`${process.env.FILE_UPLOAD_PATH}/${file.name}`);
-
-  good.photo = file.name;
-  good.save();
-
-  res.status(200).json({
-    success: true,
-    data: file.name,
+  file.mv(`${process.env.FILE_UPLOAD_PATH}/${file.name}`, (err) => {
+    if (err) {
+      throw new MyError("Файлыг хуулах явцад алдаа гарлаа" + err.message, 400);
+    }
+    good.photo = file.name;
+    good.save();
+    res.status(200).json({
+      success: true,
+      data: file.name,
+    });
   });
 });
