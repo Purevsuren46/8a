@@ -1,5 +1,5 @@
 const errorHandler = (err, req, res, next) => {
-  console.log(err.stack.cyan.underline);
+  console.log(err.stack);
 
   const error = { ...err };
 
