@@ -160,15 +160,15 @@ exports.createUser = asyncHandler(async (req, res, next) => {
   //   throw new MyError("Мессежний код буруу байна", 400);
   // } else {
   // req.body.phone = random.phone;
-  req.body.role = "user";
-  const posts = await User.create(req.body);
+  // req.body.role = "user";
+  const user = await User.create(req.body);
   // const rando = await Phone.deleteOne({ random: req.body.random });
 
   const token = posts.getJsonWebToken();
   res.status(200).json({
     success: true,
-    data: posts,
     token,
+    user: user,
   });
   // }
 });
