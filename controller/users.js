@@ -6,6 +6,7 @@ const paginate = require("../utils/paginate");
 const sendEmail = require("../utils/email");
 const crypto = require("crypto");
 const Phone = require("../models/Phone");
+const bcrypt = require("bcrypt");
 const axios = require("axios");
 
 exports.authMeUser = asyncHandler(async (req, res) => {
@@ -264,33 +265,49 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
   }
 });
 
+// exports.resetPassword = asyncHandler(async (req, res, next) => {
+//   if (!req.body.resetToken || !req.body.password) {
+//     throw new MyError("Та токен болон нууц үгээ дамжуулна уу", 400);
+//   }
+
+//   const encrypted = req.body.resetToken;
+
+//   const user = await User.findOne({
+//     resetPasswordToken: encrypted,
+//     resetPasswordExpire: { $gt: Date.now() },
+//   });
+
+//   if (!user) {
+//     throw new MyError("Токен хүчингүй байна!", 400);
+//   }
+
+//   user.password = req.body.password;
+//   user.resetPasswordToken = undefined;
+//   user.resetPasswordExpire = undefined;
+//   await user.save();
+
+//   const token = user.getJsonWebToken();
+
+//   res.status(200).json({
+//     success: true,
+//     token,
+//     user: user,
+//   });
+// });
+
 exports.resetPassword = asyncHandler(async (req, res, next) => {
-  if (!req.body.resetToken || !req.body.password) {
-    throw new MyError("Та токен болон нууц үгээ дамжуулна уу", 400);
-  }
-
-  const encrypted = req.body.resetToken;
-
-  const user = await User.findOne({
-    resetPasswordToken: encrypted,
-    resetPasswordExpire: { $gt: Date.now() },
-  });
-
+  const { phone, password } = req.body.value;
+  const userSearch = await User.findOne({ phone });
+  const user = await User.findById(userSearch._id);
   if (!user) {
-    throw new MyError("Токен хүчингүй байна!", 400);
+    throw new MyError(req.body.phone + " утастай хэрэглэгч олдсонгүй!", 400);
   }
 
-  user.password = req.body.password;
-  user.resetPasswordToken = undefined;
-  user.resetPasswordExpire = undefined;
+  user.password = password;
   await user.save();
-
-  const token = user.getJsonWebToken();
 
   res.status(200).json({
     success: true,
-    token,
-    user: user,
   });
 });
 
