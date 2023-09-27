@@ -297,8 +297,7 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
 
 exports.resetPassword = asyncHandler(async (req, res, next) => {
   const { phone, password } = req.body.value;
-  const userSearch = await User.findOne({ phone });
-  const user = await User.findById(userSearch._id);
+  const user = await User.findOne({ phone });
   if (!user) {
     throw new MyError(req.body.phone + " утастай хэрэглэгч олдсонгүй!", 400);
   }
@@ -306,8 +305,12 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
   user.password = password;
   await user.save();
 
+  const token = user.getJsonWebToken();
+
   res.status(200).json({
     success: true,
+    token,
+    user: user,
   });
 });
 
